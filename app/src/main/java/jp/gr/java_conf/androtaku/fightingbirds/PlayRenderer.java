@@ -12,8 +12,12 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PlayRenderer implements GLSurfaceView.Renderer {
     Bird bird;
+    Enemy enemy;
     DrawSky drawSky;
     Context context;
+
+    private float startX,startY;
+    private float endX,endY;
 
     public PlayRenderer(Context context){
         this.context = context;
@@ -24,6 +28,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         drawSky.draw(gl);
         bird.draw(gl);
+        enemy.draw(gl);
     }
 
     @Override
@@ -33,8 +38,8 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         drawSky.setTexture(gl,context);
         bird = new Bird(width,height);
         bird.setTexture(gl,context);
-
-
+        enemy = new Enemy(width,height);
+        enemy.setTexture(gl,context);
     }
 
     @Override
@@ -50,6 +55,22 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glEnable(GL10.GL_ALPHA_TEST);
         gl.glEnable(GL10.GL_BLEND);
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+    }
 
+    public void touchDown(float x,float y){
+        startX = x;
+        startY = y;
+        bird.getNearestBird(x,y);
+    }
+
+    public void touchMove(float x,float y){
+
+    }
+
+    public void touchUp(float x,float y){
+        endX = x;
+        endY = y;
+        float angle = (float)Math.atan((endY - startY)/(endX - startX));
+        bird.startFlying(angle);
     }
 }

@@ -2,6 +2,7 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.view.MotionEvent;
 
 /**
  * Created by takuma on 2014/08/18.
@@ -13,5 +14,22 @@ public class PlayGLSurfaceView extends GLSurfaceView {
         super(context);
         playRenderer = new PlayRenderer(context);
         setRenderer(playRenderer);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                playRenderer.touchDown(event.getX(),event.getY());
+                break;
+            case MotionEvent.ACTION_MOVE:
+
+                break;
+            case MotionEvent.ACTION_UP:
+                playRenderer.touchUp(event.getX(),event.getY());
+                break;
+        }
+
+        return true;
     }
 }

@@ -79,4 +79,6 @@ public class DrawSky {
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
     }
+
+
 }

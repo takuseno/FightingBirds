@@ -5,30 +5,51 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 
 public class MainActivity extends Activity {
 
     PlayGLSurfaceView playGLSurfaceView;
+    Button button;
+
+    private int START = 0;
+    private int PLAY = 1;
+    private int Mode = START;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ActionBar actionBar = getActionBar();
         actionBar.hide();
-        playGLSurfaceView = new PlayGLSurfaceView(this);
-        setContentView(playGLSurfaceView);
+        setContentView(R.layout.activity_main);
+
+        button = (Button)findViewById(R.id.start_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Mode = PLAY;
+                playGLSurfaceView = new PlayGLSurfaceView(MainActivity.this);
+                setContentView(playGLSurfaceView);
+            }
+        });
+
     }
 
     @Override
     public void onResume(){
         super.onResume();
-        playGLSurfaceView.onResume();
+        if(Mode == PLAY) {
+            playGLSurfaceView.onResume();
+        }
     }
 
     @Override
     public void onPause(){
         super.onPause();
-        playGLSurfaceView.onPause();
+        if(Mode == PLAY) {
+            playGLSurfaceView.onPause();
+        }
     }
 }
