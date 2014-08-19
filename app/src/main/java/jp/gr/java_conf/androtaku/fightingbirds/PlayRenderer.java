@@ -19,6 +19,8 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     private float startX,startY;
     private float endX,endY;
 
+    private int dispWidth,dispHeight;
+
     public PlayRenderer(Context context){
         this.context = context;
     }
@@ -29,10 +31,13 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         drawSky.draw(gl);
         bird.draw(gl);
         enemy.draw(gl);
+        checkColison();
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
+        dispWidth = width;
+        dispHeight = height;
         gl.glViewport(0, 0, width, height);
         drawSky = new DrawSky(width,height);
         drawSky.setTexture(gl,context);
@@ -55,6 +60,29 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glEnable(GL10.GL_ALPHA_TEST);
         gl.glEnable(GL10.GL_BLEND);
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+    }
+
+    public void checkColison(){
+        float[] birdsX = bird.getBirdsX();
+        float[] birdsY = bird.getBirdsY();
+        int[] birdsId = bird.getAliveBirdsId();
+        float[] enemyX = enemy.getEnemyX();
+        float[] enemyY = enemy.getEnemyY();
+        int[] enemyId = enemy.getAliveEnemyId();
+        for(int i = 0;i < birdsId.length;++i){
+            for(int j = 0;j < enemyId.length;++j){
+                if(Math.sqrt(((birdsX[birdsId[i]] - enemyX[enemyId[j]])
+                        * (birdsX[birdsId[i]] - enemyX[enemyId[j]] ))
+                        + ((birdsY[birdsId[i]] - enemyY[enemyId[j]])
+                        * ((birdsY[birdsId[i]]  - enemyY[enemyId[j]] ))))
+                        <  dispWidth/18
+                        ){
+                    bird.hit(birdsId[i]);
+                    enemy.hit(enemyId[j]);
+                    break;
+                }
+            }
+        }
     }
 
     public void touchDown(float x,float y){

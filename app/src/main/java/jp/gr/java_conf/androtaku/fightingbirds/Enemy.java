@@ -43,7 +43,7 @@ public class Enemy {
         Random random = new Random();
         for(int i = 0;i < 20;++i){
             enemyX[i] = 4*dispWidth/3;
-            enemyY[i] = random.nextFloat()*dispHeight;
+            enemyY[i] = random.nextFloat()*2*dispHeight/3 + (dispHeight/6);
             isAlive[i] = false;
         }
     }
@@ -111,7 +111,7 @@ public class Enemy {
                     gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[1]);
                 }
                 gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
-                FloatBuffer vertexBuffer = makeVertexBuffer((int)enemyX[i], (int) enemyY[i], dispWidth / 5, dispWidth / 5);
+                FloatBuffer vertexBuffer = makeVertexBuffer((int)enemyX[i] - (dispWidth/16), (int) enemyY[i] - (dispWidth/16), dispWidth / 8, dispWidth / 8);
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 
@@ -123,7 +123,7 @@ public class Enemy {
             }
         }
 
-        if(bornFrame > 90){
+        if(bornFrame > 40){
             bornFrame = 0;
             isAlive[bornIndex] = true;
             ++bornIndex;
@@ -137,5 +137,36 @@ public class Enemy {
         if(flyingFrame > 60){
             flyingFrame = 0;
         }
+    }
+
+    public int[] getAliveEnemyId(){
+        int num = 0;
+        for(int i = 0;i < 20;++i){
+            if(isAlive[i]){
+                ++num;
+            }
+        }
+        int[] temp = new int[num];
+        int count = 0;
+        for(int i = 0;i < 20;++i){
+            if(isAlive[i]){
+                temp[count] = i;
+                ++count;
+            }
+        }
+        return temp;
+    }
+
+    public float[] getEnemyX(){
+        return enemyX;
+    }
+
+    public float[] getEnemyY(){
+        return  enemyY;
+    }
+
+    public void hit(int id){
+        isAlive[id] = false;
+        enemyX[id] = 4*dispWidth/3;
     }
 }

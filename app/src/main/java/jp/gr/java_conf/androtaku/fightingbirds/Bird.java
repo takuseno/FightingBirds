@@ -92,19 +92,22 @@ public class Bird {
         float[] birdsY = birdsControl.getBirdsY();
         boolean[] isAlive = birdsControl.getIsAlive();
         for(int i = 0;i < isAlive.length;++i) {
-            gl.glActiveTexture(GL10.GL_TEXTURE0);
-            if (flyingFrame < 30) {
-                gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[0]);
-            } else {
-                gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[1]);
+            if(isAlive[i]) {
+                gl.glActiveTexture(GL10.GL_TEXTURE0);
+                if (flyingFrame < 30) {
+                    gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[0]);
+                } else {
+                    gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[1]);
+                }
+                gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
+                FloatBuffer vertexBuffer = makeVertexBuffer((int) birdsX[i] - (dispWidth / 20), (int) birdsY[i] - (dispWidth / 20), dispWidth / 10, dispWidth / 10);
+                gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+                gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
             }
-            gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
-            FloatBuffer vertexBuffer = makeVertexBuffer((int)birdsX[i],(int)birdsY[i], dispWidth / 10, dispWidth / 10);
-            gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-            gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
         }
 
         birdsControl.flying();
+        birdsControl.returning();
 
         ++flyingFrame;
         if(flyingFrame > 60){
@@ -118,5 +121,21 @@ public class Bird {
 
     public void startFlying(float angle){
         birdsControl.startFlying(selectedBird,angle);
+    }
+
+    public int[] getAliveBirdsId(){
+        return birdsControl.getAliveBirdsId();
+    }
+
+    public float[] getBirdsX(){
+        return  birdsControl.getBirdsX();
+    }
+
+    public float[] getBirdsY(){
+        return birdsControl.getBirdsY();
+    }
+
+    public void hit(int id){
+        birdsControl.hit(id);
     }
 }
