@@ -14,6 +14,8 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     Bird bird;
     Enemy enemy;
     DrawSky drawSky;
+    Fighter fighter;
+    Explosion explosion;
     Context context;
 
     private float startX,startY;
@@ -30,8 +32,12 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         drawSky.draw(gl);
         bird.draw(gl);
-        enemy.draw(gl);
-        checkColison();
+        fighter.draw(gl);
+        checkFighterColison();
+        checkMissileColison();
+        //enemy.draw(gl);
+        //checkEnemyColison();
+        explosion.draw(gl);
     }
 
     @Override
@@ -45,6 +51,11 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         bird.setTexture(gl,context);
         enemy = new Enemy(width,height);
         enemy.setTexture(gl,context);
+        fighter = new Fighter(width,height);
+        fighter.setTexture(gl,context);
+        explosion = new Explosion(width,height,dispWidth/10);
+
+        explosion.setTexture(gl,context);
     }
 
     @Override
@@ -62,7 +73,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    public void checkColison(){
+    public void checkEnemyColison(){
         float[] birdsX = bird.getBirdsX();
         float[] birdsY = bird.getBirdsY();
         int[] birdsId = bird.getAliveBirdsId();
@@ -80,6 +91,46 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                     bird.hit(birdsId[i]);
                     enemy.hit(enemyId[j]);
                     break;
+                }
+            }
+        }
+    }
+
+    public void checkFighterColison(){
+        float[] birdsX = bird.getBirdsX();
+        float[] birdsY = bird.getBirdsY();
+        int[] birdsId = bird.getAliveBirdsId();
+        float fighterX = fighter.getFighterX();
+        float fighterY = fighter.getFighterY();
+        for(int i = 0;i < birdsId.length;++i){
+            if(birdsX[birdsId[i]] < fighterX + (dispWidth/4)
+                    && birdsX[birdsId[i]] > fighterX - (dispWidth/4)){
+                if(birdsY[birdsId[i]] < fighterY + (dispWidth/20)
+                        && birdsY[birdsId[i]] > fighterY - (dispWidth/20)){
+                    bird.hit(birdsId[i]);
+                    fighter.hit();
+                    explosion.explode(birdsX[birdsId[i]],birdsY[birdsId[i]]);
+                }
+            }
+        }
+    }
+
+    public void checkMissileColison(){
+        if(fighter.getLaunching()) {
+            float[] birdsX = bird.getBirdsX();
+            float[] birdsY = bird.getBirdsY();
+            int[] birdsId = bird.getAliveBirdsId();
+            float missileX = fighter.getMissileX();
+            float missileY = fighter.getMissileY();
+            for (int i = 0; i < birdsId.length; ++i) {
+                if (birdsX[birdsId[i]] < missileX + (dispWidth / 8)
+                        && birdsX[birdsId[i]] > missileX - (dispWidth / 8)) {
+                    if (birdsY[birdsId[i]] < missileY + (dispWidth / 70)
+                            && birdsY[birdsId[i]] > missileY - (dispWidth / 70)) {
+                        bird.hit(birdsId[i]);
+                        fighter.missileHit();
+                        explosion.explode(missileX,missileY);
+                    }
                 }
             }
         }

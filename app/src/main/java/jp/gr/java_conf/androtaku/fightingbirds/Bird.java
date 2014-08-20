@@ -33,7 +33,7 @@ public class Bird {
     public Bird(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        birdsControl = new BirdsControl(50,dispWidth,dispHeight);
+        birdsControl = new BirdsControl(30,dispWidth,dispHeight);
     }
 
     public void setTexture(GL10 gl,Context context){

@@ -23,7 +23,7 @@ public class BirdsControl {
     private int[] returnFrame;
     private float[] returnSpeed;
 
-    private float FLYING_SPEED = 30;
+    private float FLYING_SPEED;
 
     public BirdsControl(int num,int dispWidth,int dispHeight){
         this.numBirds = num;
@@ -47,6 +47,8 @@ public class BirdsControl {
             isFlying[i] = false;
             isReturning[i] = false;
         }
+
+        FLYING_SPEED = dispWidth/30;
     }
 
     public int getNearestBird(float x,float y){

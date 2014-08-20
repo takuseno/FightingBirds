@@ -29,14 +29,18 @@ public class Enemy {
     private float[] enemyX;
     private float[] enemyY;
     private boolean[] isAlive;
-    private int bornFrame = 0;
-    private final float ENEMY_SPEED = 5;
-    private int bornIndex = 0;
+    private int bornFrame;
+    private float ENEMY_SPEED;
+    private int bornIndex;
 
     public Enemy(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
 
+        init();
+    }
+
+    public void init(){
         enemyX = new float[20];
         enemyY = new float[20];
         isAlive = new boolean[20];
@@ -46,6 +50,9 @@ public class Enemy {
             enemyY[i] = random.nextFloat()*2*dispHeight/3 + (dispHeight/6);
             isAlive[i] = false;
         }
+        bornIndex = 0;
+        bornFrame = 0;
+        ENEMY_SPEED = dispWidth/180;
     }
 
     public void setTexture(GL10 gl,Context context){
