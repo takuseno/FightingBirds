@@ -2,6 +2,7 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 /**
@@ -10,8 +11,8 @@ import android.view.MotionEvent;
 public class PlayGLSurfaceView extends GLSurfaceView {
     PlayRenderer playRenderer;
 
-    public PlayGLSurfaceView(Context context) {
-        super(context);
+    public PlayGLSurfaceView(Context context,AttributeSet attr) {
+        super(context,attr);
         playRenderer = new PlayRenderer(context);
         setRenderer(playRenderer);
     }

@@ -1,8 +1,10 @@
 package jp.gr.java_conf.androtaku.fightingbirds;
 
 import android.content.Context;
+import android.content.Intent;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
+import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -16,12 +18,20 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     DrawSky drawSky;
     Fighter fighter;
     Explosion explosion;
+    DrawScore drawScore;
     Context context;
 
     private float startX,startY;
     private float endX,endY;
 
     private int dispWidth,dispHeight;
+
+    private final int NORMAL_ENEMY = 1;
+    private final int BOSS = 2;
+    private int sequence = NORMAL_ENEMY;
+
+    private int score = 0;
+    private int loopCounter = 0;
 
     public PlayRenderer(Context context){
         this.context = context;
@@ -32,12 +42,38 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         drawSky.draw(gl);
         bird.draw(gl);
-        fighter.draw(gl);
-        checkFighterColison();
-        checkMissileColison();
-        //enemy.draw(gl);
-        //checkEnemyColison();
+        if(sequence == NORMAL_ENEMY) {
+            enemy.draw(gl);
+            checkEnemyColison(gl);
+            if(enemy.getIsOver()){
+                fighter.init(loopCounter);
+                sequence = BOSS;
+            }
+        }
+        else if(sequence == BOSS) {
+            fighter.draw(gl);
+            checkFighterColison();
+            checkMissileColison();
+            if(fighter.isOver()){
+                enemy.init(loopCounter);
+                sequence = NORMAL_ENEMY;
+                score += 100;
+                drawScore.setTexture(gl,score);
+                explosion.explode(fighter.getFighterX() - dispWidth/10,fighter.getFighterY(),dispWidth/5);
+                ++loopCounter;
+            }
+        }
         explosion.draw(gl);
+
+        drawScore.draw(gl);
+
+        if(checkOver()){
+            Log.i("result","result");
+            Intent intent = new Intent(context,ResultActivity.class);
+            intent.putExtra("score",score);
+            ((MainActivity)context).finish();
+            context.startActivity(intent);
+        }
     }
 
     @Override
@@ -51,11 +87,14 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         bird.setTexture(gl,context);
         enemy = new Enemy(width,height);
         enemy.setTexture(gl,context);
+        enemy.init(loopCounter);
         fighter = new Fighter(width,height);
         fighter.setTexture(gl,context);
-        explosion = new Explosion(width,height,dispWidth/10);
-
+        fighter.init(loopCounter);
+        explosion = new Explosion(width,height);
         explosion.setTexture(gl,context);
+        drawScore = new DrawScore(dispWidth,dispHeight);
+        drawScore.setTexture(gl,0);
     }
 
     @Override
@@ -73,7 +112,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    public void checkEnemyColison(){
+    public void checkEnemyColison(GL10 gl){
         float[] birdsX = bird.getBirdsX();
         float[] birdsY = bird.getBirdsY();
         int[] birdsId = bird.getAliveBirdsId();
@@ -90,6 +129,8 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                         ){
                     bird.hit(birdsId[i]);
                     enemy.hit(enemyId[j]);
+                    score += 10;
+                    drawScore.setTexture(gl,score);
                     break;
                 }
             }
@@ -109,7 +150,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                         && birdsY[birdsId[i]] > fighterY - (dispWidth/20)){
                     bird.hit(birdsId[i]);
                     fighter.hit();
-                    explosion.explode(birdsX[birdsId[i]],birdsY[birdsId[i]]);
+                    explosion.explode(birdsX[birdsId[i]],birdsY[birdsId[i]],dispWidth/10);
                 }
             }
         }
@@ -125,15 +166,25 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
             for (int i = 0; i < birdsId.length; ++i) {
                 if (birdsX[birdsId[i]] < missileX + (dispWidth / 8)
                         && birdsX[birdsId[i]] > missileX - (dispWidth / 8)) {
-                    if (birdsY[birdsId[i]] < missileY + (dispWidth / 70)
-                            && birdsY[birdsId[i]] > missileY - (dispWidth / 70)) {
+                    if (birdsY[birdsId[i]] < missileY + (dispWidth / 20)
+                            && birdsY[birdsId[i]] > missileY - (dispWidth / 20)) {
                         bird.hit(birdsId[i]);
                         fighter.missileHit();
-                        explosion.explode(missileX,missileY);
+                        explosion.explode(missileX,missileY,dispWidth/10);
                     }
                 }
             }
         }
+    }
+
+    public boolean checkOver(){
+        boolean[] isAlive = bird.getIsAlive();
+        for(int i = 0;i < isAlive.length;++i){
+            if(isAlive[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void touchDown(float x,float y){

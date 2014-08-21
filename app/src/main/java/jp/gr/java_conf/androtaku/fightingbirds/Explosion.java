@@ -26,17 +26,17 @@ public class Explosion {
 
 
 
-    public Explosion(int dispWidth,int dispHeight,float size){
+    public Explosion(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        this.size = size;
     }
 
-    public void explode(float x,float y){
+    public void explode(float x,float y,float size){
         frame = 0;
         isExploded = true;
         expX = x;
         expY = y;
+        this.size = size;
     }
 
     public void setTexture(GL10 gl,Context context){

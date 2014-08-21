@@ -32,27 +32,34 @@ public class Enemy {
     private int bornFrame;
     private float ENEMY_SPEED;
     private int bornIndex;
+    private int hitCounter;
+    private int BORN_FRAME_LIMIT;
+    private int ENEMY_NUM;
 
     public Enemy(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-
-        init();
     }
 
-    public void init(){
-        enemyX = new float[20];
-        enemyY = new float[20];
-        isAlive = new boolean[20];
+    public void init(int loopCounter){
+        ENEMY_NUM = (int)(20 * (1.0f + (0.1f*loopCounter)));
+        enemyX = new float[ENEMY_NUM];
+        enemyY = new float[ENEMY_NUM];
+        isAlive = new boolean[ENEMY_NUM];
         Random random = new Random();
-        for(int i = 0;i < 20;++i){
+        for(int i = 0;i < ENEMY_NUM;++i){
             enemyX[i] = 4*dispWidth/3;
             enemyY[i] = random.nextFloat()*2*dispHeight/3 + (dispHeight/6);
             isAlive[i] = false;
         }
         bornIndex = 0;
         bornFrame = 0;
-        ENEMY_SPEED = dispWidth/180;
+        ENEMY_SPEED = dispWidth/240 * (1.0f + (0.4f*loopCounter));
+        hitCounter = 0;
+        BORN_FRAME_LIMIT = 60;
+        for(int i = 0;i < loopCounter;++i){
+            BORN_FRAME_LIMIT *= 0.9f;
+        }
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -126,16 +133,16 @@ public class Enemy {
                 if(enemyX[i] < -dispWidth/5){
                     enemyX[i] = 4*dispWidth/3;
                     isAlive[i] = false;
+                    ++hitCounter;
                 }
             }
         }
 
-        if(bornFrame > 40){
-            bornFrame = 0;
-            isAlive[bornIndex] = true;
-            ++bornIndex;
-            if(bornIndex == 20){
-                bornIndex = 0;
+        if(bornFrame > BORN_FRAME_LIMIT){
+            if(bornIndex < ENEMY_NUM) {
+                bornFrame = 0;
+                isAlive[bornIndex] = true;
+                ++bornIndex;
             }
         }
         ++bornFrame;
@@ -148,14 +155,14 @@ public class Enemy {
 
     public int[] getAliveEnemyId(){
         int num = 0;
-        for(int i = 0;i < 20;++i){
+        for(int i = 0;i < ENEMY_NUM;++i){
             if(isAlive[i]){
                 ++num;
             }
         }
         int[] temp = new int[num];
         int count = 0;
-        for(int i = 0;i < 20;++i){
+        for(int i = 0;i < ENEMY_NUM;++i){
             if(isAlive[i]){
                 temp[count] = i;
                 ++count;
@@ -175,5 +182,13 @@ public class Enemy {
     public void hit(int id){
         isAlive[id] = false;
         enemyX[id] = 4*dispWidth/3;
+        ++hitCounter;
+    }
+
+    public boolean getIsOver(){
+        if(hitCounter == ENEMY_NUM){
+            return true;
+        }
+        return false;
     }
 }

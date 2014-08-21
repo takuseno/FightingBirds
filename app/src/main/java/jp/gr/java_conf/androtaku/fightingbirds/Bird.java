@@ -87,6 +87,7 @@ public class Bird {
         fb.put(array).position(0);
         return fb;
     }
+
     public void draw(GL10 gl){
         float[] birdsX = birdsControl.getBirdsX();
         float[] birdsY = birdsControl.getBirdsY();
@@ -125,6 +126,10 @@ public class Bird {
 
     public int[] getAliveBirdsId(){
         return birdsControl.getAliveBirdsId();
+    }
+
+    public boolean[] getIsAlive(){
+        return  birdsControl.getIsAlive();
     }
 
     public float[] getBirdsX(){

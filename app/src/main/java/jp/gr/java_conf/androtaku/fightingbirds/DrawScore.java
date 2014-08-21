@@ -3,6 +3,9 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.opengl.GLUtils;
 
 import java.nio.ByteBuffer;
@@ -12,18 +15,11 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by takuma on 2014/08/20.
+ * Created by takuma on 2014/08/21.
  */
-public class Missile {
+public class DrawScore {
     private int textureNo;
     private int dispWidth,dispHeight;
-
-    private float missileX;
-    private float missileY;
-    private boolean isLaunching = false;
-    private boolean isReloading = false;
-    private int reloadFrame = 0;
-    private float missileSpeed;
 
     private float[] uvBuffer = {
             0.0f,0.0f,
@@ -32,22 +28,24 @@ public class Missile {
             1.0f,1.0f
     };
 
-    public Missile(int dispWidth,int dispHeight){
+    public DrawScore(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
     }
 
-    public void init(int loopCounter){
-        missileSpeed = dispWidth/120 * (1.0f + (0.1f*loopCounter));
-        isLaunching = false;
-        isReloading = false;
-    }
-
-    public void setTexture(GL10 gl,Context context){
+    public void setTexture(GL10 gl,int score){
         int[] textureID = new int[1];
         gl.glGenTextures(1,textureID,0);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.missile);
+        Bitmap bitmap = Bitmap.createBitmap(256,256, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setTextSize(256/10);
+        paint.setAntiAlias(true);
+        canvas.drawColor(0);
+        canvas.drawText("SCORE:" + score,0,256/10,paint);
         textureNo = textureID[0];
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo);
         gl.glTexParameterx(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_NEAREST);
@@ -86,51 +84,11 @@ public class Missile {
     }
 
     public void draw(GL10 gl){
-        if(isReloading){
-            ++reloadFrame;
-            if(reloadFrame > 60){
-                isReloading = false;
-            }
-        }
-
-        if(isLaunching) {
-            gl.glActiveTexture(GL10.GL_TEXTURE0);
-            gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo);
-            gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
-            FloatBuffer vertexBuffer = makeVertexBuffer((int) missileX - (dispWidth / 16), (int) missileY - (dispWidth / 16), dispWidth / 8, dispWidth / 8);
-            gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
-            gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
-
-            missileX -= missileSpeed;
-            if(missileX < -dispWidth/16){
-                isLaunching = false;
-            }
-        }
-    }
-
-    public void fire(float startY){
-        if(!isLaunching && !isReloading) {
-            missileX = dispWidth;
-            missileY = startY;
-            isLaunching = true;
-        }
-    }
-
-    public float getMissileX(){
-        return missileX;
-    }
-
-    public float getMissileY(){
-        return missileY;
-    }
-
-    public boolean getLaunching(){
-        return isLaunching;
-    }
-
-    public void hit(){
-        isLaunching = false;
-        isReloading = true;
-        reloadFrame = 0;
+        gl.glActiveTexture(GL10.GL_TEXTURE0);
+        gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo);
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
+        FloatBuffer vertexBuffer = makeVertexBuffer(0,0, dispWidth/3, dispWidth/3);
+        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
     }
 }

@@ -40,19 +40,19 @@ public class Fighter {
     public Fighter(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        init();
         missile = new Missile(dispWidth,dispHeight);
     }
 
-    public void init(){
+    public void init(int loopCounter){
         fighterX = 2*dispWidth;
         fighterY = dispHeight/2 - (dispWidth/8);
         enteringSpeed = dispWidth/120;
-        upDownSpeed = dispHeight/240;
+        upDownSpeed = dispHeight/240*(1.0f + (0.1f*loopCounter));
         isEntering = true;
         isUp = true;
         isDown = false;
         hitCounter = 0;
+        missile.init(loopCounter);
     }
 
     public void setTexture(GL10 gl,Context context){
