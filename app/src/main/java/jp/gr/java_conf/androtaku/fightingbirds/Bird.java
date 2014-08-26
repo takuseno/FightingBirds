@@ -120,8 +120,8 @@ public class Bird {
         selectedBird = birdsControl.getNearestBird(x,y);
     }
 
-    public void startFlying(float angle){
-        birdsControl.startFlying(selectedBird,angle);
+    public void startFlying(float angle,boolean forward){
+        birdsControl.startFlying(selectedBird,angle,forward);
     }
 
     public int[] getAliveBirdsId(){

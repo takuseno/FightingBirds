@@ -30,6 +30,8 @@ public class Fighter {
 
     Missile missile;
 
+    private int fighterLife;
+
     private float[] uvBuffer = {
             0.0f,0.0f,
             0.0f,1.0f,
@@ -53,6 +55,7 @@ public class Fighter {
         isDown = false;
         hitCounter = 0;
         missile.init(loopCounter);
+        fighterLife = 3 + loopCounter;
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -155,7 +158,7 @@ public class Fighter {
     }
 
     public boolean isOver(){
-        if(hitCounter > 3){
+        if(hitCounter > fighterLife){
             return true;
         }
         return false;

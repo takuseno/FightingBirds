@@ -25,6 +25,8 @@ public class BirdsControl {
 
     private float FLYING_SPEED;
 
+    private boolean[] isForward;
+
     public BirdsControl(int num,int dispWidth,int dispHeight){
         this.numBirds = num;
         this.dispWidth = dispWidth;
@@ -39,13 +41,15 @@ public class BirdsControl {
         returnAngle = new float[num];
         returnFrame = new int[num];
         returnSpeed = new float[num];
+        isForward = new boolean[num];
         Random random = new Random();
         for(int i = 0;i < num;++i){
-            birdsX[i] = dispWidth/5 * random.nextFloat();
+            birdsX[i] = dispWidth/5 * random.nextFloat() + (dispWidth/20);
             birdsY[i] = 2*dispHeight/3 * random.nextFloat() + (dispHeight/6);
             isAlive[i] = true;
             isFlying[i] = false;
             isReturning[i] = false;
+            isForward[i] = true;
         }
 
         FLYING_SPEED = dispWidth/30;
@@ -70,9 +74,15 @@ public class BirdsControl {
     public void flying(){
         for(int i = 0;i < numBirds;++i){
             if(isFlying[i]){
-                birdsX[i] += Math.cos(flyingAngle[i])*FLYING_SPEED;
-                birdsY[i] += Math.sin(flyingAngle[i])*FLYING_SPEED;
-                if(birdsX[i] > dispWidth || birdsY[i] < -dispWidth/10 || birdsY[i] > dispHeight){
+                if(isForward[i]) {
+                    birdsX[i] += Math.cos(flyingAngle[i]) * FLYING_SPEED;
+                    birdsY[i] += Math.sin(flyingAngle[i]) * FLYING_SPEED;
+                }
+                else{
+                    birdsX[i] -= Math.cos(flyingAngle[i]) * FLYING_SPEED;
+                    birdsY[i] -= Math.sin(flyingAngle[i]) * FLYING_SPEED;
+                }
+                if(birdsX[i] > dispWidth || birdsX[i] < 0 || birdsY[i] < -dispWidth/10 || birdsY[i] > dispHeight){
                     isAlive[i] = false;
                     isFlying[i] = false;
                 }
@@ -86,7 +96,7 @@ public class BirdsControl {
                 birdsX[i] -= Math.cos(returnAngle[i])*returnSpeed[i];
                 birdsY[i] -= Math.sin(returnAngle[i])*returnSpeed[i];
                 ++returnFrame[i];
-                if(returnFrame[i] == 20){
+                if(returnFrame[i] == 19){
                     isReturning[i] = false;
                 }
             }
@@ -111,9 +121,10 @@ public class BirdsControl {
         return temp;
     }
 
-    public void startFlying(int id,float angle){
+    public void startFlying(int id,float angle,boolean forward){
         isFlying[id] = true;
         flyingAngle[id] = angle;
+        isForward[id] = forward;
     }
 
     public float[] getBirdsX(){
@@ -133,7 +144,7 @@ public class BirdsControl {
             isReturning[id] = true;
             returnFrame[id] = 0;
             Random random = new Random();
-            float returnX = dispWidth/5 * random.nextFloat();
+            float returnX = dispWidth/5 * random.nextFloat() + (dispWidth/20);
             float returnY = 2*dispHeight/3 * random.nextFloat() + (dispHeight/6);
             returnAngle[id] = (float)Math.atan((birdsY[id] - returnY)/(birdsX[id] - returnX));
             float distance = (float)Math.sqrt(((returnX - birdsX[id])*(returnX - birdsX[id])) + ((returnY - birdsY[id])*(returnY - birdsY[id])));

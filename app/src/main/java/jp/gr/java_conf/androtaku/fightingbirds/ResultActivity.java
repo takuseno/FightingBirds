@@ -4,18 +4,28 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.google.android.gms.games.Games;
+import com.google.example.games.basegameutils.GameHelper;
 
 /**
  * Created by takuma on 2014/08/21.
  */
 public class ResultActivity extends Activity {
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
+
+    GameHelper gameHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,12 +34,43 @@ public class ResultActivity extends Activity {
             ActionBar actionBar = getActionBar();
             actionBar.hide();
         }
+        else{
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
+
+        final GameHelper.GameHelperListener gameHelperListener = new GameHelper.GameHelperListener() {
+            @Override
+            public void onSignInFailed() {
+
+            }
+
+            @Override
+            public void onSignInSucceeded() {
+
+            }
+        };
+        gameHelper = new GameHelper(ResultActivity.this,GameHelper.CLIENT_GAMES);
+        gameHelper.setMaxAutoSignInAttempts(0);
+        gameHelper.setup(gameHelperListener);
 
         setContentView(R.layout.layout_result);
         init();
     }
 
     public void init(){
+        prefs = getSharedPreferences("preference",MODE_PRIVATE);
+        editor = prefs.edit();
+        if(getIntent().getIntExtra("score",0) > prefs.getInt("best_score",0)){
+            editor.putInt("best_score",getIntent().getIntExtra("score",0));
+            editor.commit();
+            TextView bestRecord = (TextView)findViewById(R.id.newRecordText);
+            bestRecord.setVisibility(View.VISIBLE);
+            if(gameHelper.isSignedIn()){
+                Games.Leaderboards.submitScore(gameHelper.getApiClient(), getString(R.string.lb_id), getIntent().getIntExtra("score",0));
+            }
+        }
+
         TextView scoreText = (TextView)findViewById(R.id.score_text);
         scoreText.setText(""+getIntent().getIntExtra("score",0));
         Button titleButton = (Button)findViewById(R.id.title_button);
@@ -46,7 +87,7 @@ public class ResultActivity extends Activity {
         twitterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "twitter://post?message="+getIntent().getIntExtra("score",0)+" app url";
+                String url = "twitter://post?message="+"Fighting Birdsで" + getIntent().getIntExtra("score",0)+"点！ https://play.google.com/store/apps/details?id=jp.gr.java_conf.androtaku.fightingbirds";
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
                 try {
@@ -63,7 +104,7 @@ public class ResultActivity extends Activity {
             public void onClick(View v) {
                 Intent intent = new Intent( Intent.ACTION_SEND );
                 intent.setType("text/plain");
-                intent.putExtra( Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=com.facebook.katana");
+                intent.putExtra( Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=jp.gr.java_conf.androtaku.fightingbirds");
                 intent.setPackage("com.facebook.katana");
                 try {
                     startActivity(intent);

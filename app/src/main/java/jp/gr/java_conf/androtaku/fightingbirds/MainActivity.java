@@ -2,8 +2,12 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,12 +15,17 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameActivity;
 import com.google.example.games.basegameutils.GameHelper;
+
+import java.io.IOException;
 
 
 public class MainActivity extends Activity {
@@ -24,13 +33,17 @@ public class MainActivity extends Activity {
     GameHelper gameHelper;
 
     PlayGLSurfaceView playGLSurfaceView;
+    MediaPlayer bgm;
 
     private int START = 0;
     private int PLAY = 1;
-    private int RESULT = 2;
     private int Mode = START;
 
     private boolean isSignIn = false;
+    private boolean isBGMInitialized = false;
+
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +52,22 @@ public class MainActivity extends Activity {
             ActionBar actionBar = getActionBar();
             actionBar.hide();
         }
+        else{
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+        }
+
+        prefs = getSharedPreferences("preference",MODE_PRIVATE);
+        editor = prefs.edit();
+        if(prefs.getBoolean("first_activated",true)){
+            showGuide();
+        }
+
+        bgm = MediaPlayer.create(this,R.raw.result_bgm);
+        bgm.setLooping(true);
+        bgm.setVolume(0.2f,0.2f);
+        bgm.start();
+        isBGMInitialized = true;
 
         setStart();
 
@@ -63,17 +92,28 @@ public class MainActivity extends Activity {
 
             @Override
             public void onSignInSucceeded() {
-                isSignIn = true;
+                editor.putBoolean("signIn",true);
+                editor.commit();
             }
         };
         gameHelper = new GameHelper(MainActivity.this,GameHelper.CLIENT_GAMES);
+        gameHelper.setMaxAutoSignInAttempts(0);
         gameHelper.setup(gameHelperListener);
+        if(prefs.getBoolean("signIn",false)){
+            gameHelper.beginUserInitiatedSignIn();
+        }
 
-        SignInButton signInButton = (SignInButton)findViewById(R.id.sign_in);
-        signInButton.setOnClickListener(new View.OnClickListener() {
+        Button rankingButton = (Button)findViewById(R.id.ranking_button);
+        rankingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                gameHelper.beginUserInitiatedSignIn();
+                if(gameHelper.isSignedIn()){
+                    startActivityForResult(Games.Leaderboards.getLeaderboardIntent(gameHelper.getApiClient(),
+                            getString(R.string.lb_id)), 5001);
+                }
+                else{
+                    gameHelper.beginUserInitiatedSignIn();
+                }
             }
         });
     }
@@ -86,19 +126,42 @@ public class MainActivity extends Activity {
         playGLSurfaceView = (PlayGLSurfaceView)gameView.findViewById(R.id.play_view);
     }
 
+    public void showGuide(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        editor.putBoolean("first_activated",false);
+                        editor.commit();
+                    }
+                })
+                .setTitle("遊び方")
+                .setMessage("トリをスワイプして迫ってくる敵に当ててください。目標に当たればトリは帰ってきますが、外すか待機中のトリに敵がぶつかるといなくなってしまいます。トリが全滅するまでにできるだけ多くの敵にトリをぶつけてください。");
+        builder.create().show();
+    }
+
     @Override
     public void onResume(){
         super.onResume();
+        if(isBGMInitialized) {
+            bgm.start();
+        }
         if(Mode == PLAY) {
-            //playGLSurfaceView.onResume();
+            playGLSurfaceView.onResume();
         }
     }
 
     @Override
     public void onPause(){
         super.onPause();
+        bgm.stop();
+        try {
+            bgm.prepare();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
         if(Mode == PLAY) {
-           // playGLSurfaceView.onPause();
+            playGLSurfaceView.onPause();
         }
     }
 
@@ -116,6 +179,12 @@ public class MainActivity extends Activity {
         if(isSignIn) {
             gameHelper.onStop();
         }
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        bgm.release();
     }
 
     @Override

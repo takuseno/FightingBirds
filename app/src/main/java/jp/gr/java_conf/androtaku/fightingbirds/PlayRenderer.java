@@ -2,6 +2,8 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
 import android.util.Log;
@@ -18,8 +20,12 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     DrawSky drawSky;
     Fighter fighter;
     Explosion explosion;
+    FeatherScatter featherScatter;
     DrawScore drawScore;
     Context context;
+
+    SoundPool soundPool;
+    int bomb_missile,bomb_fighter,pafu;
 
     private float startX,startY;
     private float endX,endY;
@@ -33,8 +39,11 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     private int score = 0;
     private int loopCounter = 0;
 
+    private boolean initialized = false;
+
     public PlayRenderer(Context context){
         this.context = context;
+
     }
 
     @Override
@@ -64,6 +73,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
             }
         }
         explosion.draw(gl);
+        featherScatter.draw(gl);
 
         drawScore.draw(gl);
 
@@ -81,21 +91,38 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         dispWidth = width;
         dispHeight = height;
         gl.glViewport(0, 0, width, height);
-        drawSky = new DrawSky(width,height);
-        drawSky.setTexture(gl,context);
-        bird = new Bird(width,height);
-        bird.setTexture(gl,context);
-        enemy = new Enemy(width,height);
-        enemy.setTexture(gl,context);
-        enemy.init(loopCounter);
-        fighter = new Fighter(width,height);
-        fighter.setTexture(gl,context);
-        fighter.init(loopCounter);
-        explosion = new Explosion(width,height);
-        explosion.setTexture(gl,context);
-        drawScore = new DrawScore(dispWidth,dispHeight);
-        drawScore.setTexture(gl,0);
+        if(!initialized) {
+            drawSky = new DrawSky(width, height);
+
+            bird = new Bird(width, height);
+
+            enemy = new Enemy(width, height);
+
+            enemy.init(loopCounter);
+            fighter = new Fighter(width, height);
+
+            fighter.init(loopCounter);
+            explosion = new Explosion(width, height);
+
+            featherScatter = new FeatherScatter(width, height);
+
+            drawScore = new DrawScore(dispWidth, dispHeight);
+
+            soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+            bomb_missile = soundPool.load(context, R.raw.bomb2, 0);
+            bomb_fighter = soundPool.load(context, R.raw.bomb1, 0);
+            pafu = soundPool.load(context,R.raw.pafu,0);
+            initialized = true;
+        }
+        drawSky.setTexture(gl, context);
+        bird.setTexture(gl, context);
+        enemy.setTexture(gl, context);
+        fighter.setTexture(gl, context);
+        explosion.setTexture(gl, context);
+        featherScatter.setTexture(gl, context);
+        drawScore.setTexture(gl, 0);
     }
+
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -119,18 +146,28 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         float[] enemyX = enemy.getEnemyX();
         float[] enemyY = enemy.getEnemyY();
         int[] enemyId = enemy.getAliveEnemyId();
+        int[] enemyTag = enemy.getEnemyTag();
         for(int i = 0;i < birdsId.length;++i){
             for(int j = 0;j < enemyId.length;++j){
+                float enemyRadius = 0;
+                if(enemyTag[enemyId[j]] == enemy.CLOW){
+                    enemyRadius = enemy.SIZE_CLOW/2;
+                }
+                else if(enemyTag[enemyId[j]] == enemy.FAT_BIRD){
+                    enemyRadius = enemy.SIZE_FAT_BIRD/2;
+                }
                 if(Math.sqrt(((birdsX[birdsId[i]] - enemyX[enemyId[j]])
                         * (birdsX[birdsId[i]] - enemyX[enemyId[j]] ))
                         + ((birdsY[birdsId[i]] - enemyY[enemyId[j]])
                         * ((birdsY[birdsId[i]]  - enemyY[enemyId[j]] ))))
-                        <  dispWidth/18
+                        <  (dispWidth/5 + enemyRadius)/3.5
                         ){
+                    featherScatter.scatter(enemyX[enemyId[j]],enemyY[enemyId[j]],dispWidth/8);
                     bird.hit(birdsId[i]);
                     enemy.hit(enemyId[j]);
                     score += 10;
                     drawScore.setTexture(gl,score);
+                    //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);
                     break;
                 }
             }
@@ -151,6 +188,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                     bird.hit(birdsId[i]);
                     fighter.hit();
                     explosion.explode(birdsX[birdsId[i]],birdsY[birdsId[i]],dispWidth/10);
+                    soundPool.play(bomb_fighter,0.0f,1.0f,0,0,1.0f);
                 }
             }
         }
@@ -171,6 +209,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                         bird.hit(birdsId[i]);
                         fighter.missileHit();
                         explosion.explode(missileX,missileY,dispWidth/10);
+                        soundPool.play(bomb_missile,1.0f,1.0f,0,0,1.0f);
                     }
                 }
             }
@@ -200,7 +239,13 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     public void touchUp(float x,float y){
         endX = x;
         endY = y;
-        float angle = (float)Math.atan((endY - startY)/(endX - startX));
-        bird.startFlying(angle);
+        if(((startX - x)*(startX - x)) + ((startY - y)*(startY - y)) > 4) {
+            float angle = (float) Math.atan((endY - startY) / (endX - startX));
+            if (endX < startX) {
+                bird.startFlying(angle, false);
+            } else {
+                bird.startFlying(angle, true);
+            }
+        }
     }
 }
