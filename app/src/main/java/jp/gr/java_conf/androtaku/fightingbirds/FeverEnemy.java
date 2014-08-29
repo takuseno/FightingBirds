@@ -57,8 +57,8 @@ public class FeverEnemy {
         }
         bornIndex = 0;
         bornFrame = 0;
-        ENEMY_SPEED = dispWidth/100;
-        BORN_FRAME_LIMIT = 20;
+        ENEMY_SPEED = dispWidth/80;
+        BORN_FRAME_LIMIT = 15;
         SIZE_CLOW = dispWidth/8;
 
         killedCounter = 0;

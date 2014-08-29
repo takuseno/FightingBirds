@@ -23,6 +23,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     Explosion explosion;
     FeatherScatter featherScatter;
     DrawScore drawScore;
+    DrawFeverTime drawFeverTime;
     Context context;
 
     SoundPool soundPool;
@@ -83,6 +84,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         }
         else if(sequence == FEVER){
             feverEnemy.draw(gl);
+            drawFeverTime.draw(gl);
             checkFeverEnemyColison(gl);
             if(feverEnemy.getIsOver()){
                 fighter.init(loopCounter);
@@ -129,6 +131,8 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
             feverEnemy = new FeverEnemy(dispWidth,dispHeight);
             feverEnemy.init();
 
+            drawFeverTime = new DrawFeverTime(dispWidth,dispHeight);
+
             soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
             bomb_missile = soundPool.load(context, R.raw.bomb2, 0);
             bomb_fighter = soundPool.load(context, R.raw.bomb1, 0);
@@ -143,6 +147,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         featherScatter.setTexture(gl, context);
         drawScore.setTexture(gl, 0);
         feverEnemy.setTexture(gl,context);
+        drawFeverTime.setTexture(gl,context);
     }
 
 
@@ -193,6 +198,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                             sequence = FEVER;
                             bird.enterFever();
                             feverEnemy.init();
+                            drawFeverTime.init();
                             Log.i("fever","enter");
                         }
                         score += 10;
