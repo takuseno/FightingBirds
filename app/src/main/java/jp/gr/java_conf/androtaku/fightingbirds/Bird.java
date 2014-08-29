@@ -140,7 +140,19 @@ public class Bird {
         return birdsControl.getBirdsY();
     }
 
+    public boolean[] getIsFlying(){
+        return birdsControl.getIsFlying();
+    }
+
     public void hit(int id){
         birdsControl.hit(id);
+    }
+
+    public void enterFever(){
+        birdsControl.enterFever();
+    }
+
+    public void overFever(){
+        birdsControl.overFever();
     }
 }

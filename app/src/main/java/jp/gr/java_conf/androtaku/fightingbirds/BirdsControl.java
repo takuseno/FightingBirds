@@ -27,6 +27,8 @@ public class BirdsControl {
 
     private boolean[] isForward;
 
+    private boolean isFever;
+
     public BirdsControl(int num,int dispWidth,int dispHeight){
         this.numBirds = num;
         this.dispWidth = dispWidth;
@@ -53,6 +55,7 @@ public class BirdsControl {
         }
 
         FLYING_SPEED = dispWidth/30;
+        isFever = false;
     }
 
     public int getNearestBird(float x,float y){
@@ -67,7 +70,6 @@ public class BirdsControl {
                 }
             }
         }
-        Log.i("select",""+num);
         return num;
     }
 
@@ -83,8 +85,21 @@ public class BirdsControl {
                     birdsY[i] -= Math.sin(flyingAngle[i]) * FLYING_SPEED;
                 }
                 if(birdsX[i] > dispWidth || birdsX[i] < 0 || birdsY[i] < -dispWidth/10 || birdsY[i] > dispHeight){
-                    isAlive[i] = false;
-                    isFlying[i] = false;
+                    if(!isFever) {
+                        isAlive[i] = false;
+                        isFlying[i] = false;
+                    }
+                    else{
+                        isReturning[i] = true;
+                        returnFrame[i] = 0;
+                        Random random = new Random();
+                        float returnX = dispWidth/5 * random.nextFloat() + (dispWidth/20);
+                        float returnY = 2*dispHeight/3 * random.nextFloat() + (dispHeight/6);
+                        returnAngle[i] = (float)Math.atan((birdsY[i] - returnY)/(birdsX[i] - returnX));
+                        float distance = (float)Math.sqrt(((returnX - birdsX[i])*(returnX - birdsX[i])) + ((returnY - birdsY[i])*(returnY - birdsY[i])));
+                        returnSpeed[i] = distance/20;
+                        isFlying[i] = false;
+                    }
                 }
             }
         }
@@ -139,6 +154,10 @@ public class BirdsControl {
         return  isAlive;
     }
 
+    public boolean[] getIsFlying(){
+        return isFlying;
+    }
+
     public void hit(int id){
         if(isFlying[id]){
             isReturning[id] = true;
@@ -151,9 +170,16 @@ public class BirdsControl {
             returnSpeed[id] = distance/20;
             isFlying[id] = false;
         }
-        else {
+        else if(!isFever) {
             isAlive[id] = false;
         }
     }
 
+    public void enterFever(){
+        isFever = true;
+    }
+
+    public void overFever(){
+        isFever = false;
+    }
 }

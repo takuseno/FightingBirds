@@ -4,10 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <jp.gr.java_conf.androtaku.fightingbirds.ResultGLSurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/result_glview"/>
+
 <RelativeLayout
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/sky">
+    android:layout_height="match_parent">
 
     <Button
         android:layout_width="wrap_content"

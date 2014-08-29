@@ -27,6 +27,9 @@ public class ResultActivity extends Activity {
 
     GameHelper gameHelper;
 
+    ResultGLSurfaceView resultGLSurfaceView;
+    private boolean initialized = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +116,23 @@ public class ResultActivity extends Activity {
                 }
             }
         });
+
+        resultGLSurfaceView = (ResultGLSurfaceView)findViewById(R.id.result_glview);
+        initialized = true;
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(initialized){
+            resultGLSurfaceView.onResume();
+        }
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        resultGLSurfaceView.onPause();
     }
 
     @Override

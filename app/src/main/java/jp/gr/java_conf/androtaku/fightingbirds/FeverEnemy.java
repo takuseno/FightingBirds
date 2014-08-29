@@ -13,9 +13,9 @@ import java.util.Random;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by takuma on 2014/08/19.
+ * Created by takuma on 2014/08/29.
  */
-public class Enemy {
+public class FeverEnemy {
     private int[] textureNo;
     private int dispWidth,dispHeight;
     private float[] uvBuffer = {
@@ -25,7 +25,6 @@ public class Enemy {
             1.0f,1.0f
     };
     private int flyingFrame;
-    private float stumblingFrame;
 
     private float[] enemyX;
     private float[] enemyY;
@@ -36,56 +35,31 @@ public class Enemy {
     private int BORN_FRAME_LIMIT;
     private int ENEMY_NUM;
 
-    public final int CLOW = 0;
-    public final int FAT_BIRD = 1;
-    public final int STUMBLING_BIRD = 2;
-    private int[] enemyTag;
-    private int[] enemyLife;
-
     public float SIZE_CLOW;
-    public float SIZE_FAT_BIRD;
 
     private int killedCounter;
-    private int hitLimit;
 
-    public Enemy(int dispWidth,int dispHeight){
+    public FeverEnemy(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
     }
 
-    public void init(int loopCounter){
-        ENEMY_NUM = (int)(20 * (1.0f + (0.1f*loopCounter)));
+    public void init(){
+        ENEMY_NUM = 40;
         enemyX = new float[ENEMY_NUM];
         enemyY = new float[ENEMY_NUM];
         isAlive = new boolean[ENEMY_NUM];
-        enemyTag = new int[ENEMY_NUM];
-        enemyLife = new int[ENEMY_NUM];
-        hitLimit = 0;
         Random random = new Random();
         for(int i = 0;i < ENEMY_NUM;++i){
             enemyX[i] = 4*dispWidth/3;
             enemyY[i] = random.nextFloat()*2*dispHeight/3 + (dispHeight/6);
             isAlive[i] = false;
-            enemyTag[i] = random.nextInt(3);
-            if(enemyTag[i] == CLOW || enemyTag[i] == STUMBLING_BIRD){
-                enemyLife[i] = 1;
-                ++hitLimit;
-            }
-            else if(enemyTag[i] == FAT_BIRD){
-                enemyLife[i] = 2;
-                hitLimit += 2;
-            }
         }
         bornIndex = 0;
         bornFrame = 0;
-        ENEMY_SPEED = dispWidth/250 * (1.0f + (0.2f*loopCounter));
-        BORN_FRAME_LIMIT = 60;
-        for(int i = 0;i < loopCounter;++i){
-            BORN_FRAME_LIMIT *= 0.9f;
-        }
-
+        ENEMY_SPEED = dispWidth/100;
+        BORN_FRAME_LIMIT = 20;
         SIZE_CLOW = dispWidth/8;
-        SIZE_FAT_BIRD = dispWidth/6;
 
         killedCounter = 0;
     }
@@ -154,23 +128,11 @@ public class Enemy {
                 }
                 gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
                 FloatBuffer vertexBuffer;
-                if(enemyTag[i] == CLOW) {
-                    vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_CLOW, (int)SIZE_CLOW);
-                }
-                else if(enemyTag[i] == FAT_BIRD){
-                    vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_FAT_BIRD, (int)SIZE_FAT_BIRD);
-                }
-                else{
-                    vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_CLOW, (int)SIZE_CLOW);
-                }
+                vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_CLOW, (int)SIZE_CLOW);
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 
                 enemyX[i] -= ENEMY_SPEED;
-                if(enemyTag[i] == STUMBLING_BIRD){
-                    enemyY[i] += Math.sin(stumblingFrame/360*2*3.16)*dispHeight/200;
-                    ++stumblingFrame;
-                }
                 if(enemyX[i] < -dispWidth/5){
                     enemyX[i] = 4*dispWidth/3;
                     isAlive[i] = false;
@@ -221,12 +183,9 @@ public class Enemy {
     }
 
     public void hit(int id){
-        enemyLife[id] -= 1;
-        if(enemyLife[id] == 0) {
-            isAlive[id] = false;
-            enemyX[id] = 4 * dispWidth / 3;
-            ++killedCounter;
-        }
+        isAlive[id] = false;
+        enemyX[id] = 4 * dispWidth / 3;
+        ++killedCounter;
     }
 
     public boolean getIsOver(){
@@ -234,13 +193,5 @@ public class Enemy {
             return true;
         }
         return false;
-    }
-
-    public int[] getEnemyTag(){
-        return enemyTag;
-    }
-
-    public int getHitLimit(){
-        return hitLimit;
     }
 }

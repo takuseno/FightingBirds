@@ -12,9 +12,9 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by takuma on 2014/08/18.
+ * Created by takuma on 2014/08/26.
  */
-public class DrawSky {
+public class DrawResultBird {
     private int[] textureNo;
     private int dispWidth,dispHeight;
     private float[] uvBuffer = {
@@ -24,9 +24,14 @@ public class DrawSky {
             1.0f,1.0f
     };
 
-    public DrawSky(int dispWidth,int dispHeight){
+    public int flyingFrame = 0;
+    public int stumblingFrame = 0;
+    private float birdY;
+
+    public DrawResultBird(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
+        birdY = dispHeight/2 - (dispWidth/12);
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -34,25 +39,25 @@ public class DrawSky {
         textureNo = new int[2];
         gl.glGenTextures(2,textureID,0);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.sky);
+        Bitmap bitmap01 = BitmapFactory.decodeResource(context.getResources(), R.drawable.bird01);
         textureNo[0] = textureID[0];
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[0]);
         gl.glTexParameterx(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_NEAREST);
         gl.glTexParameterx(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_NEAREST);
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,GL10.GL_REPLACE);
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
-        bitmap.recycle();
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap01, 0);
+        bitmap01.recycle();
 
-        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.sky_fever);
+        Bitmap bitmap02 = BitmapFactory.decodeResource(context.getResources(),R.drawable.bird02);
         textureNo[1] = textureID[1];
         gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[1]);
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap02, 0);
         gl.glTexParameterx(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MAG_FILTER,GL10.GL_NEAREST);
         gl.glTexParameterx(GL10.GL_TEXTURE_2D,GL10.GL_TEXTURE_MIN_FILTER,GL10.GL_NEAREST);
         gl.glTexEnvf(GL10.GL_TEXTURE_ENV, GL10.GL_TEXTURE_ENV_MODE,GL10.GL_REPLACE);
-        GLUtils.texImage2D(GL10.GL_TEXTURE_2D, 0, bitmap, 0);
-        bitmap.recycle();
+        GLUtils.texImage2D(GL10.GL_TEXTURE_2D,0,bitmap02,0);
+        bitmap02.recycle();
     }
-
     //頂点バッファの生成
     private FloatBuffer makeVertexBuffer(int x,int y,int w,int h) {
         //ウィンドウ座標を正規化デバイス座標に変換
@@ -81,19 +86,37 @@ public class DrawSky {
         return fb;
     }
 
-    public void draw(GL10 gl,boolean isFever){
+    public void draw(GL10 gl){
         gl.glActiveTexture(GL10.GL_TEXTURE0);
-        if(!isFever) {
+        if (flyingFrame < 30) {
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[0]);
-        }
-        else{
+        } else {
             gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[1]);
         }
         gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
-        FloatBuffer vertexBuffer = makeVertexBuffer(0,0, dispWidth, dispHeight);
+        FloatBuffer vertexBuffer = makeVertexBuffer(dispWidth/5, (int)birdY , dispWidth / 6, dispWidth / 6);
         gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
         gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+
+        gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
+        vertexBuffer = makeVertexBuffer(4*dispWidth/5 - (dispWidth/6), (int)birdY , dispWidth / 6, dispWidth / 6);
+        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+        gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+
+        if(stumblingFrame < 30) {
+            birdY -= dispHeight / 60;
+        }
+        else{
+            birdY += dispHeight/60;
+        }
+        ++stumblingFrame;
+        if(stumblingFrame == 60){
+            stumblingFrame = 0;
+        }
+
+        ++flyingFrame;
+        if(flyingFrame > 60){
+            flyingFrame = 0;
+        }
     }
-
-
 }

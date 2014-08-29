@@ -17,6 +17,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class PlayRenderer implements GLSurfaceView.Renderer {
     Bird bird;
     Enemy enemy;
+    FeverEnemy feverEnemy;
     DrawSky drawSky;
     Fighter fighter;
     Explosion explosion;
@@ -34,6 +35,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
 
     private final int NORMAL_ENEMY = 1;
     private final int BOSS = 2;
+    private final int FEVER = 3;
     private int sequence = NORMAL_ENEMY;
 
     private int score = 0;
@@ -41,15 +43,21 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
 
     private boolean initialized = false;
 
+    private int shotDownCounter = 0;
+
     public PlayRenderer(Context context){
         this.context = context;
-
     }
 
     @Override
     public void onDrawFrame(GL10 gl) {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-        drawSky.draw(gl);
+        if(sequence != FEVER) {
+            drawSky.draw(gl,false);
+        }
+        else{
+            drawSky.draw(gl,true);
+        }
         bird.draw(gl);
         if(sequence == NORMAL_ENEMY) {
             enemy.draw(gl);
@@ -69,7 +77,17 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                 score += 100;
                 drawScore.setTexture(gl,score);
                 explosion.explode(fighter.getFighterX() - dispWidth/10,fighter.getFighterY(),dispWidth/5);
+                shotDownCounter = 0;
                 ++loopCounter;
+            }
+        }
+        else if(sequence == FEVER){
+            feverEnemy.draw(gl);
+            checkFeverEnemyColison(gl);
+            if(feverEnemy.getIsOver()){
+                fighter.init(loopCounter);
+                bird.overFever();
+                sequence = BOSS;
             }
         }
         explosion.draw(gl);
@@ -108,6 +126,9 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
 
             drawScore = new DrawScore(dispWidth, dispHeight);
 
+            feverEnemy = new FeverEnemy(dispWidth,dispHeight);
+            feverEnemy.init();
+
             soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
             bomb_missile = soundPool.load(context, R.raw.bomb2, 0);
             bomb_fighter = soundPool.load(context, R.raw.bomb1, 0);
@@ -121,6 +142,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         explosion.setTexture(gl, context);
         featherScatter.setTexture(gl, context);
         drawScore.setTexture(gl, 0);
+        feverEnemy.setTexture(gl,context);
     }
 
 
@@ -143,10 +165,12 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         float[] birdsX = bird.getBirdsX();
         float[] birdsY = bird.getBirdsY();
         int[] birdsId = bird.getAliveBirdsId();
+        boolean[] isFlying = bird.getIsFlying();
         float[] enemyX = enemy.getEnemyX();
         float[] enemyY = enemy.getEnemyY();
         int[] enemyId = enemy.getAliveEnemyId();
         int[] enemyTag = enemy.getEnemyTag();
+
         for(int i = 0;i < birdsId.length;++i){
             for(int j = 0;j < enemyId.length;++j){
                 float enemyRadius = 0;
@@ -163,10 +187,51 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                         <  (dispWidth/5 + enemyRadius)/3.5
                         ){
                     featherScatter.scatter(enemyX[enemyId[j]],enemyY[enemyId[j]],dispWidth/8);
+                    if(isFlying[birdsId[i]]){
+                        ++shotDownCounter;
+                        if(shotDownCounter == enemy.getEnemyTag().length){
+                            sequence = FEVER;
+                            bird.enterFever();
+                            feverEnemy.init();
+                            Log.i("fever","enter");
+                        }
+                        score += 10;
+                        drawScore.setTexture(gl,score);
+                    }
                     bird.hit(birdsId[i]);
                     enemy.hit(enemyId[j]);
-                    score += 10;
-                    drawScore.setTexture(gl,score);
+                    //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void checkFeverEnemyColison(GL10 gl){
+        float[] birdsX = bird.getBirdsX();
+        float[] birdsY = bird.getBirdsY();
+        int[] birdsId = bird.getAliveBirdsId();
+        boolean[] isFlying = bird.getIsFlying();
+        float[] enemyX = feverEnemy.getEnemyX();
+        float[] enemyY = feverEnemy.getEnemyY();
+        int[] enemyId = feverEnemy.getAliveEnemyId();
+
+        for(int i = 0;i < birdsId.length;++i){
+            for(int j = 0;j < enemyId.length;++j){
+                float enemyRadius = enemy.SIZE_CLOW/2;
+                if(Math.sqrt(((birdsX[birdsId[i]] - enemyX[enemyId[j]])
+                        * (birdsX[birdsId[i]] - enemyX[enemyId[j]] ))
+                        + ((birdsY[birdsId[i]] - enemyY[enemyId[j]])
+                        * ((birdsY[birdsId[i]]  - enemyY[enemyId[j]] ))))
+                        <  (dispWidth/5 + enemyRadius)/3.5
+                        ){
+                    featherScatter.scatter(enemyX[enemyId[j]],enemyY[enemyId[j]],dispWidth/8);
+                    if(isFlying[birdsId[i]]){
+                        score += 10;
+                        drawScore.setTexture(gl,score);
+                    }
+                    bird.hit(birdsId[i]);
+                    feverEnemy.hit(enemyId[j]);
                     //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);
                     break;
                 }
