@@ -24,7 +24,7 @@ public class PlayGLSurfaceView extends GLSurfaceView {
                 playRenderer.touchDown(event.getX(),event.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
-
+                playRenderer.touchMove(event.getX(),event.getY());
                 break;
             case MotionEvent.ACTION_UP:
                 playRenderer.touchUp(event.getX(),event.getY());

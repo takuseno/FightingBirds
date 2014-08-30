@@ -53,8 +53,8 @@ public class Enemy {
         this.dispHeight = dispHeight;
     }
 
-    public void init(int loopCounter){
-        ENEMY_NUM = (int)(20 * (1.0f + (0.1f*loopCounter)));
+    public void init(){
+        ENEMY_NUM = 20;
         enemyX = new float[ENEMY_NUM];
         enemyY = new float[ENEMY_NUM];
         isAlive = new boolean[ENEMY_NUM];
@@ -78,11 +78,8 @@ public class Enemy {
         }
         bornIndex = 0;
         bornFrame = 0;
-        ENEMY_SPEED = dispWidth/250 * (1.0f + (0.2f*loopCounter));
+        ENEMY_SPEED = dispWidth/250;
         BORN_FRAME_LIMIT = 60;
-        for(int i = 0;i < loopCounter;++i){
-            BORN_FRAME_LIMIT *= 0.9f;
-        }
 
         SIZE_CLOW = dispWidth/8;
         SIZE_FAT_BIRD = dispWidth/6;
@@ -188,6 +185,10 @@ public class Enemy {
         }
         ++bornFrame;
 
+        if(bornIndex == ENEMY_NUM){
+            bornIndex = 0;
+        }
+
         ++flyingFrame;
         if(flyingFrame > 60){
             flyingFrame = 0;
@@ -240,7 +241,4 @@ public class Enemy {
         return enemyTag;
     }
 
-    public int getHitLimit(){
-        return hitLimit;
-    }
 }

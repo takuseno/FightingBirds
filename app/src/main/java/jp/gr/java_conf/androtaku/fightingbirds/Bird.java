@@ -28,12 +28,10 @@ public class Bird {
 
     BirdsControl birdsControl;
 
-    private int selectedBird;
-
     public Bird(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        birdsControl = new BirdsControl(30,dispWidth,dispHeight);
+        birdsControl = new BirdsControl(5,dispWidth,dispHeight);
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -107,8 +105,7 @@ public class Bird {
             }
         }
 
-        birdsControl.flying();
-        birdsControl.returning();
+        birdsControl.moveBirds();
 
         ++flyingFrame;
         if(flyingFrame > 60){
@@ -116,16 +113,12 @@ public class Bird {
         }
     }
 
-    public void getNearestBird(float x,float y){
-        selectedBird = birdsControl.getNearestBird(x,y);
+    public void touchDown(float y){
+        birdsControl.touchDown(y);
     }
 
-    public void startFlying(float angle,boolean forward){
-        birdsControl.startFlying(selectedBird,angle,forward);
-    }
-
-    public int[] getAliveBirdsId(){
-        return birdsControl.getAliveBirdsId();
+    public void touchMove(float y){
+        birdsControl.touchMove(y);
     }
 
     public boolean[] getIsAlive(){
@@ -140,19 +133,7 @@ public class Bird {
         return birdsControl.getBirdsY();
     }
 
-    public boolean[] getIsFlying(){
-        return birdsControl.getIsFlying();
-    }
-
     public void hit(int id){
         birdsControl.hit(id);
-    }
-
-    public void enterFever(){
-        birdsControl.enterFever();
-    }
-
-    public void overFever(){
-        birdsControl.overFever();
     }
 }

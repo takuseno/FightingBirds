@@ -49,7 +49,7 @@ public class ResultRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl){
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-        drawSky.draw(gl,false);
+        drawSky.draw(gl);
         drawResultBird.draw(gl);
     }
 }

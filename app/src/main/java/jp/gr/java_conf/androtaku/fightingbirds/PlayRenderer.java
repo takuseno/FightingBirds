@@ -17,34 +17,20 @@ import javax.microedition.khronos.opengles.GL10;
 public class PlayRenderer implements GLSurfaceView.Renderer {
     Bird bird;
     Enemy enemy;
-    FeverEnemy feverEnemy;
     DrawSky drawSky;
-    Fighter fighter;
-    Explosion explosion;
-    FeatherScatter featherScatter;
     DrawScore drawScore;
-    DrawFeverTime drawFeverTime;
     Context context;
 
     SoundPool soundPool;
-    int bomb_missile,bomb_fighter,pafu;
-
-    private float startX,startY;
-    private float endX,endY;
 
     private int dispWidth,dispHeight;
 
     private final int NORMAL_ENEMY = 1;
-    private final int BOSS = 2;
-    private final int FEVER = 3;
     private int sequence = NORMAL_ENEMY;
 
     private int score = 0;
-    private int loopCounter = 0;
 
     private boolean initialized = false;
-
-    private int shotDownCounter = 0;
 
     public PlayRenderer(Context context){
         this.context = context;
@@ -53,47 +39,12 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-        if(sequence != FEVER) {
-            drawSky.draw(gl,false);
-        }
-        else{
-            drawSky.draw(gl,true);
-        }
+        drawSky.draw(gl);
         bird.draw(gl);
         if(sequence == NORMAL_ENEMY) {
             enemy.draw(gl);
-            checkEnemyColison(gl);
-            if(enemy.getIsOver()){
-                fighter.init(loopCounter);
-                sequence = BOSS;
-            }
+            //checkEnemyColison(gl);
         }
-        else if(sequence == BOSS) {
-            fighter.draw(gl);
-            checkFighterColison();
-            checkMissileColison();
-            if(fighter.isOver()){
-                enemy.init(loopCounter);
-                sequence = NORMAL_ENEMY;
-                score += 100;
-                drawScore.setTexture(gl,score);
-                explosion.explode(fighter.getFighterX() - dispWidth/10,fighter.getFighterY(),dispWidth/5);
-                shotDownCounter = 0;
-                ++loopCounter;
-            }
-        }
-        else if(sequence == FEVER){
-            feverEnemy.draw(gl);
-            drawFeverTime.draw(gl);
-            checkFeverEnemyColison(gl);
-            if(feverEnemy.getIsOver()){
-                fighter.init(loopCounter);
-                bird.overFever();
-                sequence = BOSS;
-            }
-        }
-        explosion.draw(gl);
-        featherScatter.draw(gl);
 
         drawScore.draw(gl);
 
@@ -117,37 +68,20 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
             bird = new Bird(width, height);
 
             enemy = new Enemy(width, height);
-
-            enemy.init(loopCounter);
-            fighter = new Fighter(width, height);
-
-            fighter.init(loopCounter);
-            explosion = new Explosion(width, height);
-
-            featherScatter = new FeatherScatter(width, height);
+            enemy.init();
 
             drawScore = new DrawScore(dispWidth, dispHeight);
 
-            feverEnemy = new FeverEnemy(dispWidth,dispHeight);
-            feverEnemy.init();
-
-            drawFeverTime = new DrawFeverTime(dispWidth,dispHeight);
-
             soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-            bomb_missile = soundPool.load(context, R.raw.bomb2, 0);
-            bomb_fighter = soundPool.load(context, R.raw.bomb1, 0);
-            pafu = soundPool.load(context,R.raw.pafu,0);
+//            bomb_missile = soundPool.load(context, R.raw.bomb2, 0);
+//            bomb_fighter = soundPool.load(context, R.raw.bomb1, 0);
+//            pafu = soundPool.load(context,R.raw.pafu,0);
             initialized = true;
         }
         drawSky.setTexture(gl, context);
         bird.setTexture(gl, context);
         enemy.setTexture(gl, context);
-        fighter.setTexture(gl, context);
-        explosion.setTexture(gl, context);
-        featherScatter.setTexture(gl, context);
         drawScore.setTexture(gl, 0);
-        feverEnemy.setTexture(gl,context);
-        drawFeverTime.setTexture(gl,context);
     }
 
 
@@ -169,118 +103,31 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     public void checkEnemyColison(GL10 gl){
         float[] birdsX = bird.getBirdsX();
         float[] birdsY = bird.getBirdsY();
-        int[] birdsId = bird.getAliveBirdsId();
-        boolean[] isFlying = bird.getIsFlying();
+        boolean[] birdsId = bird.getIsAlive();
         float[] enemyX = enemy.getEnemyX();
         float[] enemyY = enemy.getEnemyY();
         int[] enemyId = enemy.getAliveEnemyId();
         int[] enemyTag = enemy.getEnemyTag();
 
         for(int i = 0;i < birdsId.length;++i){
-            for(int j = 0;j < enemyId.length;++j){
-                float enemyRadius = 0;
-                if(enemyTag[enemyId[j]] == enemy.CLOW){
-                    enemyRadius = enemy.SIZE_CLOW/2;
-                }
-                else if(enemyTag[enemyId[j]] == enemy.FAT_BIRD){
-                    enemyRadius = enemy.SIZE_FAT_BIRD/2;
-                }
-                if(Math.sqrt(((birdsX[birdsId[i]] - enemyX[enemyId[j]])
-                        * (birdsX[birdsId[i]] - enemyX[enemyId[j]] ))
-                        + ((birdsY[birdsId[i]] - enemyY[enemyId[j]])
-                        * ((birdsY[birdsId[i]]  - enemyY[enemyId[j]] ))))
-                        <  (dispWidth/5 + enemyRadius)/3.5
-                        ){
-                    featherScatter.scatter(enemyX[enemyId[j]],enemyY[enemyId[j]],dispWidth/8);
-                    if(isFlying[birdsId[i]]){
-                        ++shotDownCounter;
-                        if(shotDownCounter == enemy.getEnemyTag().length){
-                            sequence = FEVER;
-                            bird.enterFever();
-                            feverEnemy.init();
-                            drawFeverTime.init();
-                            Log.i("fever","enter");
-                        }
-                        score += 10;
-                        drawScore.setTexture(gl,score);
+            for(int j = 0;j < enemyId.length;++j) {
+                if (birdsId[i]) {
+                    float enemyRadius = 0;
+                    if (enemyTag[enemyId[j]] == enemy.CLOW) {
+                        enemyRadius = enemy.SIZE_CLOW / 2;
+                    } else if (enemyTag[enemyId[j]] == enemy.FAT_BIRD) {
+                        enemyRadius = enemy.SIZE_FAT_BIRD / 2;
                     }
-                    bird.hit(birdsId[i]);
-                    enemy.hit(enemyId[j]);
-                    //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);
-                    break;
-                }
-            }
-        }
-    }
-
-    public void checkFeverEnemyColison(GL10 gl){
-        float[] birdsX = bird.getBirdsX();
-        float[] birdsY = bird.getBirdsY();
-        int[] birdsId = bird.getAliveBirdsId();
-        boolean[] isFlying = bird.getIsFlying();
-        float[] enemyX = feverEnemy.getEnemyX();
-        float[] enemyY = feverEnemy.getEnemyY();
-        int[] enemyId = feverEnemy.getAliveEnemyId();
-
-        for(int i = 0;i < birdsId.length;++i){
-            for(int j = 0;j < enemyId.length;++j){
-                float enemyRadius = enemy.SIZE_CLOW/2;
-                if(Math.sqrt(((birdsX[birdsId[i]] - enemyX[enemyId[j]])
-                        * (birdsX[birdsId[i]] - enemyX[enemyId[j]] ))
-                        + ((birdsY[birdsId[i]] - enemyY[enemyId[j]])
-                        * ((birdsY[birdsId[i]]  - enemyY[enemyId[j]] ))))
-                        <  (dispWidth/5 + enemyRadius)/3.5
-                        ){
-                    featherScatter.scatter(enemyX[enemyId[j]],enemyY[enemyId[j]],dispWidth/8);
-                    if(isFlying[birdsId[i]]){
-                        score += 10;
-                        drawScore.setTexture(gl,score);
-                    }
-                    bird.hit(birdsId[i]);
-                    feverEnemy.hit(enemyId[j]);
-                    //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);
-                    break;
-                }
-            }
-        }
-    }
-
-    public void checkFighterColison(){
-        float[] birdsX = bird.getBirdsX();
-        float[] birdsY = bird.getBirdsY();
-        int[] birdsId = bird.getAliveBirdsId();
-        float fighterX = fighter.getFighterX();
-        float fighterY = fighter.getFighterY();
-        for(int i = 0;i < birdsId.length;++i){
-            if(birdsX[birdsId[i]] < fighterX + (dispWidth/4)
-                    && birdsX[birdsId[i]] > fighterX - (dispWidth/4)){
-                if(birdsY[birdsId[i]] < fighterY + (dispWidth/20)
-                        && birdsY[birdsId[i]] > fighterY - (dispWidth/20)){
-                    bird.hit(birdsId[i]);
-                    fighter.hit();
-                    explosion.explode(birdsX[birdsId[i]],birdsY[birdsId[i]],dispWidth/10);
-                    soundPool.play(bomb_fighter,0.0f,1.0f,0,0,1.0f);
-                }
-            }
-        }
-    }
-
-    public void checkMissileColison(){
-        if(fighter.getLaunching()) {
-            float[] birdsX = bird.getBirdsX();
-            float[] birdsY = bird.getBirdsY();
-            int[] birdsId = bird.getAliveBirdsId();
-            float missileX = fighter.getMissileX();
-            float missileY = fighter.getMissileY();
-            for (int i = 0; i < birdsId.length; ++i) {
-                if (birdsX[birdsId[i]] < missileX + (dispWidth / 8)
-                        && birdsX[birdsId[i]] > missileX - (dispWidth / 8)) {
-                    if (birdsY[birdsId[i]] < missileY + (dispWidth / 20)
-                            && birdsY[birdsId[i]] > missileY - (dispWidth / 20)) {
-                        bird.hit(birdsId[i]);
-                        fighter.missileHit();
-                        explosion.explode(missileX,missileY,dispWidth/10);
-                        soundPool.play(bomb_missile,1.0f,1.0f,0,0,1.0f);
+                    if (Math.sqrt(((birdsX[i] - enemyX[enemyId[j]])
+                            * (birdsX[i] - enemyX[enemyId[j]]))
+                            + ((birdsY[i] - enemyY[enemyId[j]])
+                            * ((birdsY[i] - enemyY[enemyId[j]]))))
+                            < (dispWidth / 5 + enemyRadius) / 3.5
+                            ) {
+                        bird.hit(i);
+                        enemy.hit(enemyId[j]);
+                        //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);
+                        break;
                     }
                 }
             }
@@ -298,25 +145,13 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     }
 
     public void touchDown(float x,float y){
-        startX = x;
-        startY = y;
-        bird.getNearestBird(x,y);
+        bird.touchDown(y);
     }
 
     public void touchMove(float x,float y){
-
+        bird.touchMove(y);
     }
 
     public void touchUp(float x,float y){
-        endX = x;
-        endY = y;
-        if(((startX - x)*(startX - x)) + ((startY - y)*(startY - y)) > 4) {
-            float angle = (float) Math.atan((endY - startY) / (endX - startX));
-            if (endX < startX) {
-                bird.startFlying(angle, false);
-            } else {
-                bird.startFlying(angle, true);
-            }
-        }
     }
 }
