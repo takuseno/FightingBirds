@@ -43,7 +43,8 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         bird.draw(gl);
         if(sequence == NORMAL_ENEMY) {
             enemy.draw(gl);
-            //checkEnemyColison(gl);
+
+            checkEnemyColison(gl);
         }
 
         drawScore.draw(gl);
@@ -136,7 +137,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
 
     public boolean checkOver(){
         boolean[] isAlive = bird.getIsAlive();
-        for(int i = 0;i < isAlive.length;++i){
+        for(int i = 1;i < isAlive.length;++i){
             if(isAlive[i]) {
                 return false;
             }
