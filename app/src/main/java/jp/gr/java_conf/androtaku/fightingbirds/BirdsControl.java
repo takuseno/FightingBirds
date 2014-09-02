@@ -8,6 +8,8 @@ import java.util.Random;
  * Created by takuma on 2014/08/18.
  */
 public class BirdsControl {
+    private int dispWidth,dispHeight;
+
     private int numBirds;
     private float[] birdsX;
     private float[] birdsY;
@@ -15,23 +17,32 @@ public class BirdsControl {
     private boolean[] isAlive;
     private boolean[] isMoving;
 
+    private boolean[] isCluming;
+    private int[] clumingFrame;
+
     private float followSpeed;
 
     public BirdsControl(int num,int dispWidth,int dispHeight){
         this.numBirds = num;
+        this.dispWidth = dispWidth;
+        this.dispHeight = dispHeight;
 
         birdsX = new float[num];
         birdsY = new float[num];
         isAlive = new boolean[num];
         isMoving = new boolean[num];
+        isCluming = new boolean[num];
+        clumingFrame = new int[num];
         for(int i = 0;i < num;++i){
-            birdsX[i] = dispWidth/3 - (i*dispWidth/10);
+            birdsX[i] = dispWidth/3 - (i*dispWidth/20);
             birdsY[i] = dispHeight/2;
             isAlive[i] = true;
             isMoving[i] = false;
+            isCluming[i] = false;
         }
 
         followSpeed = dispHeight / 100;
+
     }
 
     public void touchDown(float y){
@@ -46,10 +57,9 @@ public class BirdsControl {
         float startBirdY;
         for(int i = 1;i < numBirds;++i){
             startBirdY = birdsY[i - 1];
-            if(birdsY[i] > startBirdY + (followSpeed*10)
-                    || birdsY[i] < startBirdY - (followSpeed*10)){
+            if(birdsY[i] > startBirdY + (followSpeed*8)
+                    || birdsY[i] < startBirdY - (followSpeed*8)){
                 isMoving[i] = true;
-                Log.i("moving","start:" + i);
             }
             if(isMoving[i]){
                 if(birdsY[i] < birdsY[i - 1]){
@@ -58,11 +68,33 @@ public class BirdsControl {
                 else{
                     birdsY[i] -= followSpeed;
                 }
-                Log.i("moving","moving:" + i);
-                if(birdsY[i] == birdsY[i - 1]){
+                if(birdsY[i] + followSpeed >= birdsY[i - 1] && birdsY[i] - followSpeed <= birdsY[i - 1]){
                     isMoving[i] = false;
-                    Log.i("moving","stop:" + i);
+                    birdsY[i] = birdsY[i -1];
                 }
+            }
+        }
+        for(int i = 0;i < numBirds;++i){
+            if(isCluming[i]){
+                birdsX[i] += dispWidth/200;
+                ++clumingFrame[i];
+                if(clumingFrame[i] == 10){
+                    isCluming[i] = false;
+                }
+            }
+        }
+    }
+
+    public void clumingBirds(int id){
+        for(int i = id + 1;i < numBirds;++i){
+            if(isAlive[i]) {
+                isAlive[i - 1] = true;
+                isAlive[i] = false;
+                birdsY[i - 1] = birdsY[i];
+                birdsX[i - 1] = birdsX[i];
+                isCluming[i - 1] = true;
+                clumingFrame[i - 1] = 0;
+                Log.i("bird", "cluming:" + i);
             }
         }
     }
@@ -81,5 +113,6 @@ public class BirdsControl {
 
     public void hit(int id){
         isAlive[id] = false;
+        clumingBirds(id);
     }
 }

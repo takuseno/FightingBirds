@@ -37,16 +37,12 @@ public class Enemy {
     private int ENEMY_NUM;
 
     public final int CLOW = 0;
-    public final int FAT_BIRD = 1;
-    public final int STUMBLING_BIRD = 2;
+    public final int STUMBLING_BIRD = 1;
     private int[] enemyTag;
-    private int[] enemyLife;
 
     public float SIZE_CLOW;
     public float SIZE_FAT_BIRD;
 
-    private int killedCounter;
-    private int hitLimit;
 
     public Enemy(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
@@ -59,32 +55,17 @@ public class Enemy {
         enemyY = new float[ENEMY_NUM];
         isAlive = new boolean[ENEMY_NUM];
         enemyTag = new int[ENEMY_NUM];
-        enemyLife = new int[ENEMY_NUM];
-        hitLimit = 0;
-        Random random = new Random();
         for(int i = 0;i < ENEMY_NUM;++i){
-            enemyX[i] = 4*dispWidth/3;
-            enemyY[i] = random.nextFloat()*2*dispHeight/3 + (dispHeight/6);
             isAlive[i] = false;
-            enemyTag[i] = random.nextInt(3);
-            if(enemyTag[i] == CLOW || enemyTag[i] == STUMBLING_BIRD){
-                enemyLife[i] = 1;
-                ++hitLimit;
-            }
-            else if(enemyTag[i] == FAT_BIRD){
-                enemyLife[i] = 2;
-                hitLimit += 2;
-            }
+            enemyTag[i] = 0;
         }
         bornIndex = 0;
         bornFrame = 0;
-        ENEMY_SPEED = dispWidth/250;
-        BORN_FRAME_LIMIT = 60;
+        ENEMY_SPEED = dispWidth/200;
+        BORN_FRAME_LIMIT = 30;
 
         SIZE_CLOW = dispWidth/8;
-        SIZE_FAT_BIRD = dispWidth/6;
 
-        killedCounter = 0;
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -151,15 +132,7 @@ public class Enemy {
                 }
                 gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
                 FloatBuffer vertexBuffer;
-                if(enemyTag[i] == CLOW) {
-                    vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_CLOW, (int)SIZE_CLOW);
-                }
-                else if(enemyTag[i] == FAT_BIRD){
-                    vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_FAT_BIRD, (int)SIZE_FAT_BIRD);
-                }
-                else{
-                    vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_CLOW, (int)SIZE_CLOW);
-                }
+                vertexBuffer = makeVertexBuffer((int) enemyX[i] - (dispWidth / 16), (int) enemyY[i] - (dispWidth / 16), (int)SIZE_CLOW, (int)SIZE_CLOW);
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 
@@ -169,9 +142,7 @@ public class Enemy {
                     ++stumblingFrame;
                 }
                 if(enemyX[i] < -dispWidth/5){
-                    enemyX[i] = 4*dispWidth/3;
                     isAlive[i] = false;
-                    ++killedCounter;
                 }
             }
         }
@@ -180,6 +151,9 @@ public class Enemy {
             if(bornIndex < ENEMY_NUM) {
                 bornFrame = 0;
                 isAlive[bornIndex] = true;
+                Random random = new Random();
+                enemyX[bornIndex] = 4*dispWidth/3;
+                enemyY[bornIndex] = (float)Math.random()*dispHeight;
                 ++bornIndex;
             }
         }
@@ -222,19 +196,7 @@ public class Enemy {
     }
 
     public void hit(int id){
-        enemyLife[id] -= 1;
-        if(enemyLife[id] == 0) {
-            isAlive[id] = false;
-            enemyX[id] = 4 * dispWidth / 3;
-            ++killedCounter;
-        }
-    }
-
-    public boolean getIsOver(){
-        if(killedCounter == ENEMY_NUM){
-            return true;
-        }
-        return false;
+        isAlive[id] = false;
     }
 
     public int[] getEnemyTag(){

@@ -28,10 +28,13 @@ public class Bird {
 
     BirdsControl birdsControl;
 
+    public float SIZE_BIRD;
+
     public Bird(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        birdsControl = new BirdsControl(5,dispWidth,dispHeight);
+        birdsControl = new BirdsControl(7,dispWidth,dispHeight);
+        SIZE_BIRD = dispWidth/20;
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -99,7 +102,7 @@ public class Bird {
                     gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[1]);
                 }
                 gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
-                FloatBuffer vertexBuffer = makeVertexBuffer((int) birdsX[i] - (dispWidth / 20), (int) birdsY[i] - (dispWidth / 20), dispWidth / 10, dispWidth / 10);
+                FloatBuffer vertexBuffer = makeVertexBuffer((int) birdsX[i] - (int)(SIZE_BIRD/2), (int) birdsY[i] - (int)(SIZE_BIRD/2), (int)SIZE_BIRD, (int)SIZE_BIRD);
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
             }

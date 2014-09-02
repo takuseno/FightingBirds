@@ -116,14 +116,12 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                     float enemyRadius = 0;
                     if (enemyTag[enemyId[j]] == enemy.CLOW) {
                         enemyRadius = enemy.SIZE_CLOW / 2;
-                    } else if (enemyTag[enemyId[j]] == enemy.FAT_BIRD) {
-                        enemyRadius = enemy.SIZE_FAT_BIRD / 2;
                     }
                     if (Math.sqrt(((birdsX[i] - enemyX[enemyId[j]])
                             * (birdsX[i] - enemyX[enemyId[j]]))
                             + ((birdsY[i] - enemyY[enemyId[j]])
                             * ((birdsY[i] - enemyY[enemyId[j]]))))
-                            < (dispWidth / 5 + enemyRadius) / 3.5
+                            < (bird.SIZE_BIRD + enemyRadius)/2
                             ) {
                         bird.hit(i);
                         enemy.hit(enemyId[j]);
@@ -137,7 +135,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
 
     public boolean checkOver(){
         boolean[] isAlive = bird.getIsAlive();
-        for(int i = 1;i < isAlive.length;++i){
+        for(int i = 0;i < isAlive.length;++i){
             if(isAlive[i]) {
                 return false;
             }
