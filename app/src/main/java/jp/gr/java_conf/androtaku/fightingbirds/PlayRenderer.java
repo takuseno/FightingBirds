@@ -43,7 +43,11 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         bird.draw(gl);
         if(sequence == NORMAL_ENEMY) {
             enemy.draw(gl);
-
+            if(enemy.isOutside){
+                score += 10 * bird.getAliveNum();
+                enemy.isOutside = false;
+                drawScore.setTexture(gl,score);
+            }
             checkEnemyColison(gl);
         }
 
@@ -84,7 +88,6 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         enemy.setTexture(gl, context);
         drawScore.setTexture(gl, 0);
     }
-
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {

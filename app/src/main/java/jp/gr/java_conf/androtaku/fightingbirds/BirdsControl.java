@@ -22,6 +22,8 @@ public class BirdsControl {
 
     private float followSpeed;
 
+    private float touchStartY;
+
     public BirdsControl(int num,int dispWidth,int dispHeight){
         this.numBirds = num;
         this.dispWidth = dispWidth;
@@ -34,7 +36,7 @@ public class BirdsControl {
         isCluming = new boolean[num];
         clumingFrame = new int[num];
         for(int i = 0;i < num;++i){
-            birdsX[i] = dispWidth/3 - (i*dispWidth/20);
+            birdsX[i] = dispWidth/3 - (i*dispWidth/18);
             birdsY[i] = dispHeight/2;
             isAlive[i] = true;
             isMoving[i] = false;
@@ -46,11 +48,16 @@ public class BirdsControl {
     }
 
     public void touchDown(float y){
-        birdsY[0] = y;
+        touchStartY = y;
     }
 
     public void touchMove(float y){
-        birdsY[0] = y;
+        birdsY[0] = touchStartY - y;
+        if(birdsY[0] < 0){
+            birdsY[0] = 0;
+        }else if(birdsY[0] > dispHeight){
+            birdsY[0] = dispHeight;
+        }
     }
 
     public void moveBirds(){
@@ -76,7 +83,7 @@ public class BirdsControl {
         }
         for(int i = 0;i < numBirds;++i){
             if(isCluming[i]){
-                birdsX[i] += dispWidth/200;
+                birdsX[i] += dispWidth/180;
                 ++clumingFrame[i];
                 if(clumingFrame[i] == 10){
                     isCluming[i] = false;

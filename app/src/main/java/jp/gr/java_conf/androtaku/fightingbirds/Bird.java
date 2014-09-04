@@ -33,8 +33,8 @@ public class Bird {
     public Bird(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        birdsControl = new BirdsControl(7,dispWidth,dispHeight);
-        SIZE_BIRD = dispWidth/20;
+        birdsControl = new BirdsControl(6,dispWidth,dispHeight);
+        SIZE_BIRD = dispWidth/18;
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -126,6 +126,16 @@ public class Bird {
 
     public boolean[] getIsAlive(){
         return  birdsControl.getIsAlive();
+    }
+
+    public int getAliveNum(){
+        int counter = 0;
+        boolean[] isAlive = birdsControl.getIsAlive();
+        for(int i = 0;i < isAlive.length;++i){
+            if(isAlive[i])
+                ++counter;
+        }
+        return counter;
     }
 
     public float[] getBirdsX(){

@@ -43,6 +43,9 @@ public class Enemy {
     public float SIZE_CLOW;
     public float SIZE_FAT_BIRD;
 
+    public boolean isOutside;
+    private int throughCounter;
+    private float speedRate;
 
     public Enemy(int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
@@ -64,8 +67,10 @@ public class Enemy {
         ENEMY_SPEED = dispWidth/200;
         BORN_FRAME_LIMIT = 30;
 
-        SIZE_CLOW = dispWidth/8;
-
+        SIZE_CLOW = dispWidth/10;
+        isOutside = false;
+        throughCounter = 0;
+        speedRate = 1.0f;
     }
 
     public void setTexture(GL10 gl,Context context){
@@ -136,13 +141,19 @@ public class Enemy {
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 
-                enemyX[i] -= ENEMY_SPEED;
+                enemyX[i] -= ENEMY_SPEED*speedRate;
                 if(enemyTag[i] == STUMBLING_BIRD){
                     enemyY[i] += Math.sin(stumblingFrame/360*2*3.16)*dispHeight/200;
                     ++stumblingFrame;
                 }
                 if(enemyX[i] < -dispWidth/5){
                     isAlive[i] = false;
+                    isOutside = true;
+                    ++throughCounter;
+                    if(throughCounter > 20){
+                        throughCounter = 0;
+                        speedRate += 0.1;
+                    }
                 }
             }
         }
@@ -151,7 +162,6 @@ public class Enemy {
             if(bornIndex < ENEMY_NUM) {
                 bornFrame = 0;
                 isAlive[bornIndex] = true;
-                Random random = new Random();
                 enemyX[bornIndex] = 4*dispWidth/3;
                 enemyY[bornIndex] = (float)Math.random()*dispHeight;
                 ++bornIndex;
