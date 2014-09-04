@@ -11,7 +11,6 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class ResultRenderer implements GLSurfaceView.Renderer {
 
-    private int dispWidth,dispHeight;
     private Context context;
     DrawSky drawSky;
     DrawResultBird drawResultBird;
@@ -37,13 +36,9 @@ public class ResultRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onSurfaceChanged(GL10 gl,int width,int height){
-        this.dispWidth = width;
-        this.dispHeight = height;
         gl.glViewport(0, 0, width, height);
-        drawSky = new DrawSky(width,height);
-        drawSky.setTexture(gl,context);
-        drawResultBird = new DrawResultBird(width,height);
-        drawResultBird.setTexture(gl,context);
+        drawSky = new DrawSky(context,gl,width,height);
+        drawResultBird = new DrawResultBird(context,gl,width,height);
     }
 
     @Override

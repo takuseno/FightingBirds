@@ -15,78 +15,25 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by takuma on 2014/08/18.
  */
 public class PlayRenderer implements GLSurfaceView.Renderer {
-    Bird bird;
-    Enemy enemy;
-    DrawSky drawSky;
-    DrawScore drawScore;
-    Context context;
+    PlaySequence playSequence;
 
     SoundPool soundPool;
 
-    private int dispWidth,dispHeight;
-
-    private final int NORMAL_ENEMY = 1;
-    private int sequence = NORMAL_ENEMY;
-
-    private int score = 0;
-
-    private boolean initialized = false;
+    private Context context;
 
     public PlayRenderer(Context context){
+        playSequence = new PlaySequence();
         this.context = context;
     }
 
     @Override
-    public void onDrawFrame(GL10 gl) {
-        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-        drawSky.draw(gl);
-        bird.draw(gl);
-        if(sequence == NORMAL_ENEMY) {
-            enemy.draw(gl);
-            if(enemy.isOutside){
-                score += 10 * bird.getAliveNum();
-                enemy.isOutside = false;
-                drawScore.setTexture(gl,score);
-            }
-            checkEnemyColison(gl);
-        }
-
-        drawScore.draw(gl);
-
-        if(checkOver()){
-            Log.i("result","result");
-            Intent intent = new Intent(context,ResultActivity.class);
-            intent.putExtra("score",score);
-            ((MainActivity)context).finish();
-            context.startActivity(intent);
-        }
-    }
-
-    @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
-        dispWidth = width;
-        dispHeight = height;
         gl.glViewport(0, 0, width, height);
-        if(!initialized) {
-            drawSky = new DrawSky(width, height);
 
-            bird = new Bird(width, height);
+        playSequence.init(context,gl,width,height);
 
-            enemy = new Enemy(width, height);
-            enemy.init();
-
-            drawScore = new DrawScore(dispWidth, dispHeight);
-
-            soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-//            bomb_missile = soundPool.load(context, R.raw.bomb2, 0);
-//            bomb_fighter = soundPool.load(context, R.raw.bomb1, 0);
+        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 //            pafu = soundPool.load(context,R.raw.pafu,0);
-            initialized = true;
-        }
-        drawSky.setTexture(gl, context);
-        bird.setTexture(gl, context);
-        enemy.setTexture(gl, context);
-        drawScore.setTexture(gl, 0);
     }
 
     @Override
@@ -104,56 +51,21 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    public void checkEnemyColison(GL10 gl){
-        float[] birdsX = bird.getBirdsX();
-        float[] birdsY = bird.getBirdsY();
-        boolean[] birdsId = bird.getIsAlive();
-        float[] enemyX = enemy.getEnemyX();
-        float[] enemyY = enemy.getEnemyY();
-        int[] enemyId = enemy.getAliveEnemyId();
-        int[] enemyTag = enemy.getEnemyTag();
-
-        for(int i = 0;i < birdsId.length;++i){
-            for(int j = 0;j < enemyId.length;++j) {
-                if (birdsId[i]) {
-                    float enemyRadius = 0;
-                    if (enemyTag[enemyId[j]] == enemy.CLOW) {
-                        enemyRadius = enemy.SIZE_CLOW / 2;
-                    }
-                    if (Math.sqrt(((birdsX[i] - enemyX[enemyId[j]])
-                            * (birdsX[i] - enemyX[enemyId[j]]))
-                            + ((birdsY[i] - enemyY[enemyId[j]])
-                            * ((birdsY[i] - enemyY[enemyId[j]]))))
-                            < (bird.SIZE_BIRD + enemyRadius)/2.5
-                            ) {
-                        bird.hit(i);
-                        enemy.hit(enemyId[j]);
-                        //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    public boolean checkOver(){
-        boolean[] isAlive = bird.getIsAlive();
-        for(int i = 0;i < isAlive.length;++i){
-            if(isAlive[i]) {
-                return false;
-            }
-        }
-        return true;
+    @Override
+    public void onDrawFrame(GL10 gl) {
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+        playSequence.draw(gl);
     }
 
     public void touchDown(float x,float y){
-        bird.touchDown(y);
+        playSequence.touchDown(x,y);
     }
 
     public void touchMove(float x,float y){
-        bird.touchMove(y);
+        playSequence.touchMove(x,y);
     }
 
     public void touchUp(float x,float y){
+        playSequence.touchUp(x,y);
     }
 }
