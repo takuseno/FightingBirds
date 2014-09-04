@@ -124,7 +124,7 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
                             * (birdsX[i] - enemyX[enemyId[j]]))
                             + ((birdsY[i] - enemyY[enemyId[j]])
                             * ((birdsY[i] - enemyY[enemyId[j]]))))
-                            < (bird.SIZE_BIRD + enemyRadius)/2
+                            < (bird.SIZE_BIRD + enemyRadius)/2.5
                             ) {
                         bird.hit(i);
                         enemy.hit(enemyId[j]);

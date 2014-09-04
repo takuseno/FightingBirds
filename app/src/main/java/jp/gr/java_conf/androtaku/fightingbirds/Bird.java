@@ -102,7 +102,23 @@ public class Bird {
                     gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[1]);
                 }
                 gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
-                FloatBuffer vertexBuffer = makeVertexBuffer((int) birdsX[i] - (int)(SIZE_BIRD/2), (int) birdsY[i] - (int)(SIZE_BIRD/2), (int)SIZE_BIRD, (int)SIZE_BIRD);
+                FloatBuffer vertexBuffer = makeVertexBuffer((int) birdsX[i] - (int)(SIZE_BIRD/2),
+                        (int) birdsY[i] - (int)(SIZE_BIRD/2), (int)SIZE_BIRD, (int)SIZE_BIRD);
+                gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+                gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
+            }
+        }
+
+        float[] fallingBirdsX = birdsControl.getFallingBirdsX();
+        float[] fallingBirdsY = birdsControl.getFallingBirdsY();
+        boolean[] isFalling = birdsControl.getIsFalling();
+        for(int i = 0;i < isFalling.length;++i) {
+            if(isFalling[i]) {
+                gl.glActiveTexture(GL10.GL_TEXTURE0);
+                gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[0]);
+                gl.glTexCoordPointer(2, GL10.GL_FLOAT, 0, makeFloatBuffer(uvBuffer));
+                FloatBuffer vertexBuffer = makeVertexBuffer((int) fallingBirdsX[i] - (int)(SIZE_BIRD/2),
+                        (int) fallingBirdsY[i] - (int)(SIZE_BIRD/2), (int)SIZE_BIRD, (int)SIZE_BIRD);
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
             }

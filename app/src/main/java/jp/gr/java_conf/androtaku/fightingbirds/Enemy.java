@@ -30,6 +30,8 @@ public class Enemy {
     private float[] enemyX;
     private float[] enemyY;
     private boolean[] isAlive;
+    private boolean[] isFalling;
+    private int[] fallingFrame;
     private int bornFrame;
     private float ENEMY_SPEED;
     private int bornIndex;
@@ -57,9 +59,12 @@ public class Enemy {
         enemyX = new float[ENEMY_NUM];
         enemyY = new float[ENEMY_NUM];
         isAlive = new boolean[ENEMY_NUM];
+        isFalling = new boolean[ENEMY_NUM];
+        fallingFrame = new int[ENEMY_NUM];
         enemyTag = new int[ENEMY_NUM];
         for(int i = 0;i < ENEMY_NUM;++i){
             isAlive[i] = false;
+            isFalling[i] = false;
             enemyTag[i] = 0;
         }
         bornIndex = 0;
@@ -128,7 +133,7 @@ public class Enemy {
 
     public void draw(GL10 gl){
         for(int i = 0;i < isAlive.length;++i) {
-            if (isAlive[i]) {
+            if (isAlive[i] || isFalling[i]) {
                 gl.glActiveTexture(GL10.GL_TEXTURE0);
                 if (flyingFrame < 30) {
                     gl.glBindTexture(GL10.GL_TEXTURE_2D, textureNo[0]);
@@ -141,19 +146,30 @@ public class Enemy {
                 gl.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
                 gl.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, 4);
 
-                enemyX[i] -= ENEMY_SPEED*speedRate;
-                if(enemyTag[i] == STUMBLING_BIRD){
-                    enemyY[i] += Math.sin(stumblingFrame/360*2*3.16)*dispHeight/200;
-                    ++stumblingFrame;
-                }
-                if(enemyX[i] < -dispWidth/5){
-                    isAlive[i] = false;
-                    isOutside = true;
-                    ++throughCounter;
-                    if(throughCounter > 20){
-                        throughCounter = 0;
-                        speedRate += 0.1;
+                if(isAlive[i]) {
+                    enemyX[i] -= ENEMY_SPEED * speedRate;
+                    if (enemyTag[i] == STUMBLING_BIRD) {
+                        enemyY[i] += Math.sin(stumblingFrame / 360 * 2 * 3.16) * dispHeight / 200;
+                        ++stumblingFrame;
                     }
+                    if (enemyX[i] < -dispWidth / 5) {
+                        isAlive[i] = false;
+                        isOutside = true;
+                        ++throughCounter;
+                        if (throughCounter > 20) {
+                            throughCounter = 0;
+                            speedRate += 0.1;
+                            BORN_FRAME_LIMIT *= 0.9;
+                        }
+                    }
+                }
+
+                else if(isFalling[i]){
+                    enemyX[i] += dispWidth/100;
+                    enemyY[i] -= dispHeight/100 - (dispHeight/300*fallingFrame[i]);
+                    ++fallingFrame[i];
+                    if(enemyY[i] > dispHeight)
+                        isFalling[i] = false;
                 }
             }
         }
@@ -163,7 +179,8 @@ public class Enemy {
                 bornFrame = 0;
                 isAlive[bornIndex] = true;
                 enemyX[bornIndex] = 4*dispWidth/3;
-                enemyY[bornIndex] = (float)Math.random()*dispHeight;
+                Random random = new Random();
+                enemyY[bornIndex] = (float)random.nextInt(8)*dispHeight/7;
                 ++bornIndex;
             }
         }
@@ -207,6 +224,8 @@ public class Enemy {
 
     public void hit(int id){
         isAlive[id] = false;
+        isFalling[id] = true;
+        fallingFrame[id] = 0;
     }
 
     public int[] getEnemyTag(){

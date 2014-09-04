@@ -14,6 +14,12 @@ public class BirdsControl {
     private float[] birdsX;
     private float[] birdsY;
 
+    private float[] fallingBirdsX;
+    private float[] fallingBirdsY;
+    private boolean[] isFalling;
+    private int[] fallingFrame;
+    private int fallingIndex;
+
     private boolean[] isAlive;
     private boolean[] isMoving;
 
@@ -31,9 +37,13 @@ public class BirdsControl {
 
         birdsX = new float[num];
         birdsY = new float[num];
+        fallingBirdsX = new float[num];
+        fallingBirdsY = new float[num];
         isAlive = new boolean[num];
         isMoving = new boolean[num];
         isCluming = new boolean[num];
+        isFalling = new boolean[num];
+        fallingFrame = new int[num];
         clumingFrame = new int[num];
         for(int i = 0;i < num;++i){
             birdsX[i] = dispWidth/3 - (i*dispWidth/18);
@@ -41,10 +51,11 @@ public class BirdsControl {
             isAlive[i] = true;
             isMoving[i] = false;
             isCluming[i] = false;
+            isFalling[i] = false;
         }
 
         followSpeed = dispHeight / 100;
-
+        fallingIndex = 0;
     }
 
     public void touchDown(float y){
@@ -52,7 +63,8 @@ public class BirdsControl {
     }
 
     public void touchMove(float y){
-        birdsY[0] = touchStartY - y;
+        birdsY[0] -= touchStartY - y;
+        touchStartY = y;
         if(birdsY[0] < 0){
             birdsY[0] = 0;
         }else if(birdsY[0] > dispHeight){
@@ -81,6 +93,7 @@ public class BirdsControl {
                 }
             }
         }
+
         for(int i = 0;i < numBirds;++i){
             if(isCluming[i]){
                 birdsX[i] += dispWidth/180;
@@ -88,6 +101,16 @@ public class BirdsControl {
                 if(clumingFrame[i] == 10){
                     isCluming[i] = false;
                 }
+            }
+        }
+
+        for(int i = 0;i < fallingIndex;++i){
+            if(isFalling[i]){
+                fallingBirdsX[i] -= dispWidth/100;
+                fallingBirdsY[i] -= dispHeight/100 - (dispHeight/400*fallingFrame[i]);
+                ++fallingFrame[i];
+                if(fallingBirdsY[i] > dispHeight)
+                    isFalling[i] = false;
             }
         }
     }
@@ -118,8 +141,25 @@ public class BirdsControl {
         return  isAlive;
     }
 
+    public float[] getFallingBirdsX(){
+        return fallingBirdsX;
+    }
+
+    public float[] getFallingBirdsY(){
+        return fallingBirdsY;
+    }
+
+    public boolean[] getIsFalling(){
+        return isFalling;
+    }
+
     public void hit(int id){
         isAlive[id] = false;
+        isFalling[fallingIndex] = true;
+        fallingFrame[fallingIndex] = 0;
+        fallingBirdsX[fallingIndex] = birdsX[id];
+        fallingBirdsY[fallingIndex] = birdsY[id];
+        ++fallingIndex;
         clumingBirds(id);
     }
 }
