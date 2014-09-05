@@ -21,7 +21,7 @@ public class Enemy {
     private PlaySequence playSequence;
 
     //declare ids of texture
-    private int[] textureIds = {R.drawable.crow01,R.drawable.crow02};
+    private int[] textureIds = {R.drawable.crow01,R.drawable.crow02,R.drawable.baloon};
 
     //declare global variables
     private int dispWidth,dispHeight;
@@ -32,6 +32,11 @@ public class Enemy {
     //positons of enemies
     private float[] enemyX;
     private float[] enemyY;
+
+    //tags of enemyy kinds
+    private int[] enemyTags;
+    public int CLOW = 1;
+    public int BALLOON = 2;
 
     //size of enemy
     public float SIZE_CLOW;
@@ -56,13 +61,10 @@ public class Enemy {
     private int[] fallingFrame;
     private int bornFrame;
 
-    //counter of enemy outside screen
-    private int throughCounter;
-
     public Enemy(Context context,GL10 gl,int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        drawTexture = new DrawTexture(context,2,dispWidth,dispHeight);
+        drawTexture = new DrawTexture(context,3,dispWidth,dispHeight);
         drawTexture.setTexture(textureIds,gl);
     }
 
@@ -81,6 +83,7 @@ public class Enemy {
         isAlive = new boolean[ENEMY_NUM];
         isFalling = new boolean[ENEMY_NUM];
         fallingFrame = new int[ENEMY_NUM];
+        enemyTags = new int[ENEMY_NUM];
         for(int i = 0;i < ENEMY_NUM;++i){
             isAlive[i] = false;
             isFalling[i] = false;
@@ -91,7 +94,6 @@ public class Enemy {
         BORN_FRAME_LIMIT = 30;
         SIZE_CLOW = dispWidth/10;
         isOutside = false;
-        throughCounter = 0;
         speedRate = 1.0f;
     }
 
@@ -99,12 +101,17 @@ public class Enemy {
     public void draw(GL10 gl){
         for(int i = 0;i < isAlive.length;++i) {
             if (isAlive[i] || isFalling[i]) {
-                //draw enemy
-                if (flyingFrame < 30) {
-                    drawTexture.drawTexture(gl,0,(int)enemyX[i],(int)enemyY[i],(int)SIZE_CLOW,(int)SIZE_CLOW);
-                } else {
-                    drawTexture.drawTexture(gl,1,(int)enemyX[i],(int)enemyY[i],(int)SIZE_CLOW,(int)SIZE_CLOW);
+                //draw clow
+                if(enemyTags[i] == CLOW) {
+                    if (flyingFrame < 30) {
+                        drawTexture.drawTexture(gl, 0, (int) enemyX[i], (int) enemyY[i], (int) SIZE_CLOW, (int) SIZE_CLOW);
+                    } else {
+                        drawTexture.drawTexture(gl, 1, (int) enemyX[i], (int) enemyY[i], (int) SIZE_CLOW, (int) SIZE_CLOW);
+                    }
                 }
+                //draw balloon
+                else if(enemyTags[i] == BALLOON)
+                    drawTexture.drawTexture(gl, 2, (int) enemyX[i], (int) enemyY[i], (int) SIZE_CLOW, (int) SIZE_CLOW);
                 //check enemy alive
                 if(isAlive[i]) {
                     //move enemy
@@ -113,13 +120,6 @@ public class Enemy {
                     if (enemyX[i] < -dispWidth / 5) {
                         isAlive[i] = false;
                         isOutside = true;
-                        ++throughCounter;
-                        //make it difficult
-                        if (throughCounter > 20) {
-                            throughCounter = 0;
-                            speedRate += 0.1;
-                            BORN_FRAME_LIMIT *= 0.95;
-                        }
                     }
                 }
                 //check enemy falling
@@ -154,6 +154,10 @@ public class Enemy {
             Random random = new Random();
             int rand = random.nextInt(4);
             enemyY[bornIndex] = birdsY[0]  - (dispHeight/4) + (dispHeight/2*rand/4);
+            if(random.nextInt(20) == 0)
+                enemyTags[bornIndex] = BALLOON;
+            else
+                enemyTags[bornIndex] = CLOW;
             ++bornIndex;
         }
         //add frame
@@ -161,6 +165,8 @@ public class Enemy {
         //loop index
         if(bornIndex == ENEMY_NUM){
             bornIndex = 0;
+            speedRate += 0.1;
+            BORN_FRAME_LIMIT *= 0.95;
         }
     }
 
@@ -190,6 +196,11 @@ public class Enemy {
     //function of getting y positions
     public float[] getEnemyY(){
         return  enemyY;
+    }
+
+    //function of getting tags
+    public int[] getEnemyTags(){
+        return enemyTags;
     }
 
     //function of hit enemy

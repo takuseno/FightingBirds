@@ -58,7 +58,7 @@ public class PlaySequence {
         }
 
         //check collision between birds and enemies
-        checkEnemyColison();
+        checkEnemyColison(gl);
 
         //check gameover
         if(checkOver()){
@@ -71,7 +71,7 @@ public class PlaySequence {
     }
 
     //function of collision between birds and enemies
-    public void checkEnemyColison(){
+    public void checkEnemyColison(GL10 gl){
         //get birds positions
         float[] birdsX = bird.getBirdsX();
         float[] birdsY = bird.getBirdsY();
@@ -80,6 +80,7 @@ public class PlaySequence {
         float[] enemyX = enemy.getEnemyX();
         float[] enemyY = enemy.getEnemyY();
         int[] enemyId = enemy.getAliveEnemyId();
+        int[] enemyTags = enemy.getEnemyTags();
         //loop for checking collisions
         for(int i = 0;i < birdsId.length;++i){
             for(int j = 0;j < enemyId.length;++j) {
@@ -89,7 +90,16 @@ public class PlaySequence {
                             + Math.pow(birdsY[i] - enemyY[enemyId[j]],2))
                                 < (bird.SIZE_BIRD + enemyRadius)/2.5) {
                         //processing of a hit bird
-                        bird.hit(i);
+                        if(enemyTags[enemyId[j]] == enemy.CLOW) {
+                            bird.hit(i);
+                            //add score
+                            score += 10 * bird.getNumAlive();
+                            //remake score texture
+                            drawScore.setTexture(gl,score);
+                        }
+                        else if(enemyTags[enemyId[j]] == enemy.BALLOON) {
+                            bird.hitBalloon();
+                        }
                         //processing of a hit enemy
                         enemy.hit(enemyId[j]);
                         //soundPool.play(pafu,10.0f,10.0f,0,0,1.0f);

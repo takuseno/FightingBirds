@@ -20,17 +20,24 @@ public class Bird {
     private BirdsControl birdsControl;
 
     //declare ids of texture
-    private int[] textureIds = {R.drawable.bird01,R.drawable.bird02};
+    private int[] textureIds = {R.drawable.bird01,R.drawable.bird02,R.drawable.bird_mighty};
 
     //size of birds
     public float SIZE_BIRD;
-    //frame
-    public int flyingFrame = 0;
 
+    //flag
+    private boolean isMighty = false;
+
+    //frame
+    private int flyingFrame = 0;
+    private int mightyFrame = 0;
+
+    //counter
+    private int balloonCounter = 0;
 
     public Bird(Context context,GL10 gl,int dispWidth,int dispHeight){
         birdsControl = new BirdsControl(6,dispWidth,dispHeight);
-        drawTexture = new DrawTexture(context,2,dispWidth,dispHeight);
+        drawTexture = new DrawTexture(context,3,dispWidth,dispHeight);
         drawTexture.setTexture(textureIds,gl);
         SIZE_BIRD = dispWidth/18;
     }
@@ -52,10 +59,15 @@ public class Bird {
             //check birds alive
             if(isAlive[i]) {
                 //draw
-                if (flyingFrame < 30) {
-                    drawTexture.drawTexture(gl,0,(int)birdsX[i],(int)birdsY[i],(int)SIZE_BIRD,(int)SIZE_BIRD);
-                } else {
-                    drawTexture.drawTexture(gl,1,(int)birdsX[i],(int)birdsY[i],(int)SIZE_BIRD,(int)SIZE_BIRD);
+                if(!isMighty) {
+                    if (flyingFrame < 30) {
+                        drawTexture.drawTexture(gl, 0, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    } else {
+                        drawTexture.drawTexture(gl, 1, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    }
+                }
+                else{
+                    drawTexture.drawTexture(gl, 2, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
                 }
             }
         }
@@ -81,6 +93,13 @@ public class Bird {
         ++flyingFrame;
         if(flyingFrame > 60){
             flyingFrame = 0;
+        }
+        if(isMighty){
+            ++mightyFrame;
+            if(mightyFrame > 300) {
+                isMighty = false;
+                balloonCounter = 0;
+            }
         }
     }
 
@@ -110,7 +129,16 @@ public class Bird {
 
     //function of treating hit birds
     public void hit(int id){
-        birdsControl.hit(id);
+        if(!isMighty)
+            birdsControl.hit(id);
+    }
+    //function of hit balloon
+    public void hitBalloon(){
+        ++balloonCounter;
+        if(balloonCounter == 3) {
+            isMighty = true;
+            mightyFrame = 0;
+        }
     }
 
     //function of treating touch down
