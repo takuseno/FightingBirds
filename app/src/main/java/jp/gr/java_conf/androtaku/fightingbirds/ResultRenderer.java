@@ -14,7 +14,6 @@ public class ResultRenderer implements GLSurfaceView.Renderer {
     private DrawResultBird drawResultBird;
 
     private Context context;
-    private boolean isNewRecord = false;
 
     public ResultRenderer(Context context){
         this.context = context;
@@ -46,11 +45,6 @@ public class ResultRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl){
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         drawSky.draw(gl);
-        if(isNewRecord)
-            drawResultBird.draw(gl);
-    }
-
-    public void setNewRecord(boolean isNewRecord){
-        this.isNewRecord = isNewRecord;
+        drawResultBird.draw(gl);
     }
 }

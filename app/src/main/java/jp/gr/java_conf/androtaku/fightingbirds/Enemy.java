@@ -153,7 +153,7 @@ public class Enemy {
             float[] birdsY = playSequence.bird.getBirdsY();
             Random random = new Random();
             int rand = random.nextInt(4);
-            enemyY[bornIndex] = birdsY[0]  - (dispHeight/4) + (dispHeight/2*rand/3);
+            enemyY[bornIndex] = birdsY[0]  - (dispHeight/4) + (dispHeight/2*rand/4);
             ++bornIndex;
         }
         //add frame

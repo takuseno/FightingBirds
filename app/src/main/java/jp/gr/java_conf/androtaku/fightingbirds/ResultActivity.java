@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.games.Games;
@@ -77,6 +78,8 @@ public class ResultActivity extends Activity {
             }
         }
 
+        FrameLayout frameLayout = (FrameLayout)findViewById(R.id.framelayout);
+
         TextView scoreText = (TextView)findViewById(R.id.score_text);
         scoreText.setText(""+getIntent().getIntExtra("score",0));
         Button titleButton = (Button)findViewById(R.id.title_button);
@@ -93,7 +96,8 @@ public class ResultActivity extends Activity {
         twitterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "twitter://post?message="+"Fighting Birdsで" + getIntent().getIntExtra("score",0)+"点！ https://play.google.com/store/apps/details?id=jp.gr.java_conf.androtaku.fightingbirds";
+                String url = "twitter://post?message="+"Fighting Birdsで" + getIntent().getIntExtra("score",0)
+                        +"点！ https://play.google.com/store/apps/details?id=jp.gr.java_conf.androtaku.fightingbirds";
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
                 try {
@@ -121,7 +125,8 @@ public class ResultActivity extends Activity {
         });
 
         resultGLSurfaceView = (ResultGLSurfaceView)findViewById(R.id.result_glview);
-        resultGLSurfaceView.setNewRecord(isNewRecord);
+        if(!isNewRecord)
+            frameLayout.removeView(resultGLSurfaceView);
 
         initialized = true;
     }

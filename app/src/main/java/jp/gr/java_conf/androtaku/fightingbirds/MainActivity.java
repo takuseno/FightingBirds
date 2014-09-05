@@ -120,10 +120,8 @@ public class MainActivity extends Activity {
 
     public void setGame(){
         Mode = PLAY;
-        LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View gameView = layoutInflater.inflate(R.layout.play_layout, null, false);
-        setContentView(gameView);
-        playGLSurfaceView = (PlayGLSurfaceView)gameView.findViewById(R.id.play_view);
+        setContentView(R.layout.play_layout);
+        playGLSurfaceView = (PlayGLSurfaceView)findViewById(R.id.play_view);
     }
 
     public void showGuide(){
