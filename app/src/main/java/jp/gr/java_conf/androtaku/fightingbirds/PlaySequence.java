@@ -11,10 +11,10 @@ import javax.microedition.khronos.opengles.GL10;
  */
 public class PlaySequence {
     //declare classes for drawing
-    private Bird bird;
-    private Enemy enemy;
-    private DrawSky drawSky;
-    private DrawScore drawScore;
+    public Bird bird;
+    public Enemy enemy;
+    public DrawSky drawSky;
+    public DrawScore drawScore;
 
     //declare global variables
     private int score;
@@ -23,17 +23,20 @@ public class PlaySequence {
     //function of initialization
     public void init(Context context,GL10 gl,int dispWidth,int dispHeight){
         this.context = context;
-
         drawSky = new DrawSky(context,gl,dispWidth, dispHeight);
         bird = new Bird(context,gl,dispWidth, dispHeight);
         enemy = new Enemy(context,gl,dispWidth, dispHeight);
+        enemy.init(this);
         drawScore = new DrawScore(dispWidth, dispHeight);
-
-        enemy.init();
-
         drawScore.setTexture(gl, 0);
-
         score = 0;
+    }
+
+    //function of setting texture when resume
+    public void setTexture(GL10 gl){
+        drawSky.setTexture(gl);
+        bird.setTexture(gl);
+        enemy.setTexture(gl);
     }
 
     //function of drawing
@@ -47,7 +50,7 @@ public class PlaySequence {
         //check if an enemy go outside screen
         if(enemy.isOutside){
             //add score
-            score += 10 * bird.getAliveNum();
+            score += 10 * bird.getNumAlive();
             //restore flag
             enemy.isOutside = false;
             //remake score texture

@@ -10,10 +10,11 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by takuma on 2014/08/26.
  */
 public class ResultRenderer implements GLSurfaceView.Renderer {
+    private DrawSky drawSky;
+    private DrawResultBird drawResultBird;
 
     private Context context;
-    DrawSky drawSky;
-    DrawResultBird drawResultBird;
+    private boolean isNewRecord = false;
 
     public ResultRenderer(Context context){
         this.context = context;
@@ -45,6 +46,11 @@ public class ResultRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl){
         gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
         drawSky.draw(gl);
-        drawResultBird.draw(gl);
+        if(isNewRecord)
+            drawResultBird.draw(gl);
+    }
+
+    public void setNewRecord(boolean isNewRecord){
+        this.isNewRecord = isNewRecord;
     }
 }

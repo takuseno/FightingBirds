@@ -135,8 +135,8 @@ public class MainActivity extends Activity {
                         editor.commit();
                     }
                 })
-                .setTitle("遊び方")
-                .setMessage("トリをスワイプして迫ってくる敵に当ててください。目標に当たればトリは帰ってきますが、外すか待機中のトリに敵がぶつかるといなくなってしまいます。トリが全滅するまでにできるだけ多くの敵にトリをぶつけてください。");
+                .setTitle("How to play")
+                .setMessage("Many clows come from right to left. You should make birds avoid them by swiping up or down. The more you have remains, the higher you get the score.");
         builder.create().show();
     }
 
@@ -194,5 +194,4 @@ public class MainActivity extends Activity {
             gameHelper.onActivityResult(request, response, data);
         }
     }
-
 }

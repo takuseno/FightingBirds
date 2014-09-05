@@ -18,6 +18,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class Enemy {
     //declare class
     private DrawTexture drawTexture;
+    private PlaySequence playSequence;
 
     //declare ids of texture
     private int[] textureIds = {R.drawable.crow01,R.drawable.crow02};
@@ -65,8 +66,15 @@ public class Enemy {
         drawTexture.setTexture(textureIds,gl);
     }
 
+    //function of setting texture when resume
+    public void setTexture(GL10 gl){
+        drawTexture.setTexture(textureIds,gl);
+    }
+
     //function of initialization
-    public void init(){
+    public void init(PlaySequence playSequence){
+        //set sequece
+        this.playSequence = playSequence;
         //set arrays
         enemyX = new float[ENEMY_NUM];
         enemyY = new float[ENEMY_NUM];
@@ -91,62 +99,72 @@ public class Enemy {
     public void draw(GL10 gl){
         for(int i = 0;i < isAlive.length;++i) {
             if (isAlive[i] || isFalling[i]) {
+                //draw enemy
                 if (flyingFrame < 30) {
                     drawTexture.drawTexture(gl,0,(int)enemyX[i],(int)enemyY[i],(int)SIZE_CLOW,(int)SIZE_CLOW);
                 } else {
                     drawTexture.drawTexture(gl,1,(int)enemyX[i],(int)enemyY[i],(int)SIZE_CLOW,(int)SIZE_CLOW);
                 }
-
+                //check enemy alive
                 if(isAlive[i]) {
+                    //move enemy
                     enemyX[i] -= ENEMY_SPEED * speedRate;
+                    //check enemy outside
                     if (enemyX[i] < -dispWidth / 5) {
                         isAlive[i] = false;
                         isOutside = true;
                         ++throughCounter;
+                        //make it difficult
                         if (throughCounter > 20) {
                             throughCounter = 0;
                             speedRate += 0.1;
-                            BORN_FRAME_LIMIT *= 0.9;
+                            BORN_FRAME_LIMIT *= 0.95;
                         }
                     }
                 }
-
+                //check enemy falling
                 else if(isFalling[i]){
                     enemyX[i] += dispWidth/100;
                     enemyY[i] -= dispHeight/100 - (dispHeight/300*fallingFrame[i]);
                     ++fallingFrame[i];
+                    //check enemy outside
                     if(enemyY[i] > dispHeight)
                         isFalling[i] = false;
                 }
             }
         }
 
+        //produce enemy
         bornBirds();
 
+        //add frame
         ++flyingFrame;
         if(flyingFrame > 60){
             flyingFrame = 0;
         }
     }
 
+    //function of producing enemy
     public void bornBirds(){
         if(bornFrame > BORN_FRAME_LIMIT){
-            if(bornIndex < ENEMY_NUM) {
-                bornFrame = 0;
-                isAlive[bornIndex] = true;
-                enemyX[bornIndex] = 4*dispWidth/3;
-                Random random = new Random();
-                enemyY[bornIndex] = (float)random.nextInt(8)*dispHeight/7;
-                ++bornIndex;
-            }
+            bornFrame = 0;
+            isAlive[bornIndex] = true;
+            enemyX[bornIndex] = 4*dispWidth/3;
+            float[] birdsY = playSequence.bird.getBirdsY();
+            Random random = new Random();
+            int rand = random.nextInt(4);
+            enemyY[bornIndex] = birdsY[0]  - (dispHeight/4) + (dispHeight/2*rand/3);
+            ++bornIndex;
         }
+        //add frame
         ++bornFrame;
-
+        //loop index
         if(bornIndex == ENEMY_NUM){
             bornIndex = 0;
         }
     }
 
+    //function of getting ids of alive enemies
     public int[] getAliveEnemyId(){
         int num = 0;
         for(int i = 0;i < ENEMY_NUM;++i){
@@ -165,14 +183,16 @@ public class Enemy {
         return temp;
     }
 
+    //function of getting x positions
     public float[] getEnemyX(){
         return enemyX;
     }
-
+    //function of getting y positions
     public float[] getEnemyY(){
         return  enemyY;
     }
 
+    //function of hit enemy
     public void hit(int id){
         isAlive[id] = false;
         isFalling[id] = true;

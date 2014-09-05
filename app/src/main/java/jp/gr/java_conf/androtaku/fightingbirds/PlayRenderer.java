@@ -20,17 +20,25 @@ public class PlayRenderer implements GLSurfaceView.Renderer {
     SoundPool soundPool;
 
     private Context context;
+    private boolean initialized;
 
     public PlayRenderer(Context context){
         playSequence = new PlaySequence();
         this.context = context;
+        initialized = false;
     }
 
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         gl.glViewport(0, 0, width, height);
 
-        playSequence.init(context,gl,width,height);
+        if(!initialized) {
+            playSequence.init(context, gl, width, height);
+            initialized = true;
+        }
+        else{
+            playSequence.setTexture(gl);
+        }
 
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 //            pafu = soundPool.load(context,R.raw.pafu,0);

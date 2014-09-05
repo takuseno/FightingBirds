@@ -28,6 +28,8 @@ public class ResultActivity extends Activity {
     GameHelper gameHelper;
 
     ResultGLSurfaceView resultGLSurfaceView;
+
+    private boolean isNewRecord = false;
     private boolean initialized = false;
 
     @Override
@@ -69,6 +71,7 @@ public class ResultActivity extends Activity {
             editor.commit();
             TextView bestRecord = (TextView)findViewById(R.id.newRecordText);
             bestRecord.setVisibility(View.VISIBLE);
+            isNewRecord = true;
             if(gameHelper.isSignedIn()){
                 Games.Leaderboards.submitScore(gameHelper.getApiClient(), getString(R.string.lb_id), getIntent().getIntExtra("score",0));
             }
@@ -118,6 +121,8 @@ public class ResultActivity extends Activity {
         });
 
         resultGLSurfaceView = (ResultGLSurfaceView)findViewById(R.id.result_glview);
+        resultGLSurfaceView.setNewRecord(isNewRecord);
+
         initialized = true;
     }
 

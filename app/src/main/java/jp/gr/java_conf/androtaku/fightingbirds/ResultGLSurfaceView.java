@@ -11,11 +11,17 @@ public class ResultGLSurfaceView extends GLSurfaceView {
 
     ResultRenderer resultRenderer;
 
+    private boolean isNewRecord = false;
+
     public ResultGLSurfaceView(Context context,AttributeSet attr){
         super(context,attr);
         resultRenderer = new ResultRenderer(context);
+        resultRenderer.setNewRecord(isNewRecord);
         setRenderer(resultRenderer);
     }
 
+    public void setNewRecord(boolean isNewRecord){
+        this.isNewRecord = isNewRecord;
+    }
 
 }

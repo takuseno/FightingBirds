@@ -27,9 +27,11 @@ public class DrawSky {
         drawTexture.setTexture(textureId,gl);
     }
 
+    public void setTexture(GL10 gl){
+        drawTexture.setTexture(textureId,gl);
+    }
+
     public void draw(GL10 gl){
         drawTexture.drawTexture(gl,0,dispWidth/2,dispHeight/2,dispWidth,dispHeight);
     }
-
-
 }
