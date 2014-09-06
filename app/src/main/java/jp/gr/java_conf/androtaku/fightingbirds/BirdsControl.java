@@ -111,7 +111,7 @@ public class BirdsControl {
         }
 
         //moving falling birds
-        for(int i = 0;i < fallingIndex;++i){
+        for(int i = 0;i < numBirds;++i){
             //check bird falling
             if(isFalling[i]){
                 fallingBirdsX[i] -= dispWidth/100;
@@ -135,6 +135,18 @@ public class BirdsControl {
                 birdsX[i - 1] = birdsX[i];
                 isCraming[i - 1] = true;
                 cramingFrame[i - 1] = 0;
+            }
+        }
+    }
+
+    //function of adding bird
+    public void addingBirds(){
+        for(int i = 0;i < numBirds;++i){
+            if(!isAlive[i]){
+                isAlive[i] = true;
+                birdsX[i] = birdsX[i - 1] - (dispWidth/18);
+                birdsY[i] = birdsY[i - 1];
+                break;
             }
         }
     }
@@ -175,6 +187,8 @@ public class BirdsControl {
         fallingBirdsX[fallingIndex] = birdsX[id];
         fallingBirdsY[fallingIndex] = birdsY[id];
         ++fallingIndex;
+        if(fallingIndex == numBirds)
+            fallingIndex = 0;
         cramingBirds(id);
     }
 

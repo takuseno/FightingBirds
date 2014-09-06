@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLUtils;
+import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -21,13 +22,13 @@ public class Enemy {
     private PlaySequence playSequence;
 
     //declare ids of texture
-    private int[] textureIds = {R.drawable.crow01,R.drawable.crow02,R.drawable.baloon};
+    private int[] textureIds = {R.drawable.crow01,R.drawable.crow02,R.drawable.balloon_red,R.drawable.balloon_green};
 
     //declare global variables
     private int dispWidth,dispHeight;
 
     //number of enemy
-    private int ENEMY_NUM = 20;
+    private int ENEMY_NUM = 100;
 
     //positons of enemies
     private float[] enemyX;
@@ -36,7 +37,8 @@ public class Enemy {
     //tags of enemyy kinds
     private int[] enemyTags;
     public int CLOW = 1;
-    public int BALLOON = 2;
+    public int BALLOON_RED = 2;
+    public int BALLOON_GREEN = 3;
 
     //size of enemy
     public float SIZE_CLOW;
@@ -64,7 +66,7 @@ public class Enemy {
     public Enemy(Context context,GL10 gl,int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
         this.dispHeight = dispHeight;
-        drawTexture = new DrawTexture(context,3,dispWidth,dispHeight);
+        drawTexture = new DrawTexture(context,4,dispWidth,dispHeight);
         drawTexture.setTexture(textureIds,gl);
     }
 
@@ -91,7 +93,7 @@ public class Enemy {
         bornIndex = 0;
         bornFrame = 0;
         ENEMY_SPEED = dispWidth/200;
-        BORN_FRAME_LIMIT = 30;
+        BORN_FRAME_LIMIT = 40;
         SIZE_CLOW = dispWidth/10;
         isOutside = false;
         speedRate = 1.0f;
@@ -110,8 +112,10 @@ public class Enemy {
                     }
                 }
                 //draw balloon
-                else if(enemyTags[i] == BALLOON)
+                else if(enemyTags[i] == BALLOON_RED)
                     drawTexture.drawTexture(gl, 2, (int) enemyX[i], (int) enemyY[i], (int) SIZE_CLOW, (int) SIZE_CLOW);
+                else if(enemyTags[i] == BALLOON_GREEN)
+                    drawTexture.drawTexture(gl, 3, (int) enemyX[i], (int) enemyY[i], (int) SIZE_CLOW, (int) SIZE_CLOW);
                 //check enemy alive
                 if(isAlive[i]) {
                     //move enemy
@@ -154,20 +158,26 @@ public class Enemy {
             Random random = new Random();
             int rand = random.nextInt(4);
             enemyY[bornIndex] = birdsY[0]  - (dispHeight/4) + (dispHeight/2*rand/4);
-            if(random.nextInt(20) == 0)
-                enemyTags[bornIndex] = BALLOON;
+            rand = random.nextInt(80);
+            if(rand == 0)
+                enemyTags[bornIndex] = BALLOON_RED;
+            else if(rand == 3)
+                enemyTags[bornIndex] = BALLOON_GREEN;
             else
                 enemyTags[bornIndex] = CLOW;
             ++bornIndex;
+            //loop index
+            if(bornIndex == ENEMY_NUM){
+                bornIndex = 0;
+            }
+            if(bornIndex%20 == 0){
+                speedRate += 0.1;
+                BORN_FRAME_LIMIT = (int)(30 / speedRate);
+                Log.i("up","" + bornIndex);
+            }
         }
         //add frame
         ++bornFrame;
-        //loop index
-        if(bornIndex == ENEMY_NUM){
-            bornIndex = 0;
-            speedRate += 0.1;
-            BORN_FRAME_LIMIT *= 0.95;
-        }
     }
 
     //function of getting ids of alive enemies

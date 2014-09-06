@@ -97,8 +97,11 @@ public class PlaySequence {
                             //remake score texture
                             drawScore.setTexture(gl,score);
                         }
-                        else if(enemyTags[enemyId[j]] == enemy.BALLOON) {
-                            bird.hitBalloon();
+                        else if(enemyTags[enemyId[j]] == enemy.BALLOON_RED) {
+                            bird.hitBalloonRed();
+                        }
+                        else if(enemyTags[enemyId[j]] == enemy.BALLOON_GREEN){
+                            bird.hitBalloonGreen();
                         }
                         //processing of a hit enemy
                         enemy.hit(enemyId[j]);

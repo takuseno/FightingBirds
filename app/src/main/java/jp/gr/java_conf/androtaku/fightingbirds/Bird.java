@@ -67,7 +67,21 @@ public class Bird {
                     }
                 }
                 else{
-                    drawTexture.drawTexture(gl, 2, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    if(mightyFrame < 520) {
+                        drawTexture.drawTexture(gl, 2, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    }
+                    else if(mightyFrame < 540){
+                        drawTexture.drawTexture(gl, 0, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    }
+                    else if(mightyFrame < 560){
+                        drawTexture.drawTexture(gl, 2, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    }
+                    else if(mightyFrame < 580){
+                        drawTexture.drawTexture(gl, 0, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    }
+                    else if(mightyFrame <= 600){
+                        drawTexture.drawTexture(gl, 2, (int) birdsX[i], (int) birdsY[i], (int) SIZE_BIRD, (int) SIZE_BIRD);
+                    }
                 }
             }
         }
@@ -96,7 +110,7 @@ public class Bird {
         }
         if(isMighty){
             ++mightyFrame;
-            if(mightyFrame > 300) {
+            if(mightyFrame > 600) {
                 isMighty = false;
                 balloonCounter = 0;
             }
@@ -133,12 +147,15 @@ public class Bird {
             birdsControl.hit(id);
     }
     //function of hit balloon
-    public void hitBalloon(){
+    public void hitBalloonRed(){
         ++balloonCounter;
-        if(balloonCounter == 3) {
+        if(balloonCounter == 1) {
             isMighty = true;
             mightyFrame = 0;
         }
+    }
+    public void hitBalloonGreen(){
+        birdsControl.addingBirds();
     }
 
     //function of treating touch down
