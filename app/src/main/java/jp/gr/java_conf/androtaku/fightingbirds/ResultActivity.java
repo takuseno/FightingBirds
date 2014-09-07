@@ -75,7 +75,7 @@ public class ResultActivity extends Activity {
                     Games.Achievements.unlock(gameHelper.getApiClient(),
                             getString(R.string.achievement_veteran));
                 }
-                if(prefs.getInt("best_score", 0)  > 25000){
+                if(prefs.getInt("best_score", 0)  > 30000){
                     Games.Achievements.unlock(gameHelper.getApiClient(),
                             getString(R.string.achievement_professional));
                 }

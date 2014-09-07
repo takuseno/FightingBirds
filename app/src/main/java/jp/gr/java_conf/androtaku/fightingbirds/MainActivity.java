@@ -49,6 +49,7 @@ public class MainActivity extends Activity{
 
     GameHelper gameHelper;
     IInAppBillingService billingServices;
+    String DELETE_ADS_ID = "delete_ads";
     ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -56,13 +57,14 @@ public class MainActivity extends Activity{
             if(!prefs.getBoolean("delete_ads",false)) {
                 try {
                     Bundle ownedItems = billingServices.getPurchases(3, getPackageName(), "inapp", null);
-                    int responce = ownedItems.getInt("RESPONCE_CODE");
+                    int responce = ownedItems.getInt("RESPONSE_CODE");
                     if(responce == 0){
                         ArrayList ownedSkus = ownedItems.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
                         for(int i = 0;i < ownedSkus.size();++i){
-                            if(ownedSkus.get(i).equals("delete_ads")){
+                            if(ownedSkus.get(i).equals(DELETE_ADS_ID)){
                                 editor.putBoolean("delete_ads",true);
                                 editor.commit();
+                                showAdsExplanation();
                             }
                         }
                     }
@@ -124,10 +126,6 @@ public class MainActivity extends Activity{
         //setting billing service
         bindService(new Intent("com.android.vending.billing.InAppBillingService.BIND"),
                 serviceConnection,Context.BIND_AUTO_CREATE);
-        ArrayList<String> skuList = new ArrayList<String>();
-        skuList.add("delete_ads");
-        Bundle querySkus = new Bundle();
-        querySkus.putStringArrayList("ITEM_ID_LIST",skuList);
 
         //game feat ads
         gfAppCntroller = new GameFeatAppController();
@@ -190,8 +188,8 @@ public class MainActivity extends Activity{
             public void onClick(View v) {
                 try {
                     Bundle buyIntentBundle = billingServices.getBuyIntent(3, getPackageName(),
-                            "delete_ads", "inapp", "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
-                    if(buyIntentBundle.getInt("RESPONCE_CODE") == 0){
+                            DELETE_ADS_ID, "inapp", "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
+                    if(buyIntentBundle.getInt("RESPONSE_CODE") == 0){
                         PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
                         try {
                             startIntentSenderForResult(pendingIntent.getIntentSender(),
@@ -229,8 +227,20 @@ public class MainActivity extends Activity{
                         editor.commit();
                     }
                 })
-                .setTitle("How to play")
-                .setMessage("Many clows come from right to left. You should make birds avoid them by swiping up or down. The more you have remains, the higher you get the score.");
+                .setTitle("遊び方")
+                .setMessage("画面を上下にスワイプして、画面右から次々に出てくる鳥達を避けてください。残っている自分たちの鳥の数が多いほどスコアが高くなります。風船にぶつかるといいことが起こります。");
+        builder.create().show();
+    }
+
+    public void showAdsExplanation(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .setTitle("購入を確認しました")
+                .setMessage("次のアプリの起動時から完全に広告は表示されません。");
         builder.create().show();
     }
 
@@ -295,16 +305,15 @@ public class MainActivity extends Activity{
     protected void onActivityResult(int request, int response, Intent data) {
         super.onActivityResult(request, response, data);
         if(request == 1001){
-            int responceCode = data.getIntExtra("RESPONCE_CODE",0);
             String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-            if(responceCode== RESULT_OK){
+            if(response == RESULT_OK){
                 try {
                     JSONObject jo = new JSONObject(purchaseData);
                     String sku = jo.getString("productId");
-                    if("delete_ads".equals(sku)){
+                    if(DELETE_ADS_ID.equals(sku)){
                         editor.putBoolean("delete_ads",true);
                         editor.commit();
+                        showAdsExplanation();
                     }
                 }catch(JSONException e){
                     e.printStackTrace();

@@ -14,7 +14,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=" Start "
+        android:text="Start"
         android:id="@+id/start_button"
         android:background="@drawable/normal_button"
         android:layout_alignParentBottom="true"
@@ -50,11 +50,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/normal_button"
-        android:text="  Free Games  "
+        android:text="Free Games"
         android:id="@+id/wall_button"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
+        android:layout_above="@+id/start_button"
+        android:layout_alignRight="@+id/start_button"
+        android:layout_alignEnd="@+id/start_button"
+        android:layout_alignLeft="@+id/start_button"
+        android:layout_alignStart="@+id/start_button"
         android:layout_marginBottom="10sp" />
 
     <Button
@@ -63,7 +65,7 @@
         android:text="  広告削除  "
         android:id="@+id/ad_delete_button"
         android:background="@drawable/normal_button"
-        android:layout_below="@+id/wall_button"
+        android:layout_alignTop="@+id/ranking_button"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

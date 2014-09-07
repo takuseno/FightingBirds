@@ -32,9 +32,6 @@ public class Bird {
     private int flyingFrame = 0;
     private int mightyFrame = 0;
 
-    //counter
-    private int balloonCounter = 0;
-
     public Bird(Context context,GL10 gl,int dispWidth,int dispHeight){
         birdsControl = new BirdsControl(6,dispWidth,dispHeight);
         drawTexture = new DrawTexture(context,3,dispWidth,dispHeight);
@@ -112,7 +109,6 @@ public class Bird {
             ++mightyFrame;
             if(mightyFrame > 600) {
                 isMighty = false;
-                balloonCounter = 0;
             }
         }
     }
@@ -148,11 +144,8 @@ public class Bird {
     }
     //function of hit balloon
     public void hitBalloonRed(){
-        ++balloonCounter;
-        if(balloonCounter == 1) {
-            isMighty = true;
-            mightyFrame = 0;
-        }
+        isMighty = true;
+        mightyFrame = 0;
     }
     public void hitBalloonGreen(){
         birdsControl.addingBirds();
