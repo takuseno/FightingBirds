@@ -3,16 +3,19 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +24,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.vending.billing.IInAppBillingService;
@@ -29,13 +33,19 @@ import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameActivity;
 import com.google.example.games.basegameutils.GameHelper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.ArrayList;
 
 import jp.basicinc.gamefeat.android.sdk.controller.GameFeatAppController;
 import jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity{
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
 
     GameHelper gameHelper;
     IInAppBillingService billingServices;
@@ -43,6 +53,23 @@ public class MainActivity extends Activity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             billingServices = IInAppBillingService.Stub.asInterface(service);
+            if(!prefs.getBoolean("delete_ads",false)) {
+                try {
+                    Bundle ownedItems = billingServices.getPurchases(3, getPackageName(), "inapp", null);
+                    int responce = ownedItems.getInt("RESPONCE_CODE");
+                    if(responce == 0){
+                        ArrayList ownedSkus = ownedItems.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
+                        for(int i = 0;i < ownedSkus.size();++i){
+                            if(ownedSkus.get(i).equals("delete_ads")){
+                                editor.putBoolean("delete_ads",true);
+                                editor.commit();
+                            }
+                        }
+                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         @Override
@@ -63,9 +90,6 @@ public class MainActivity extends Activity {
     private boolean isSignIn = false;
     private boolean isBGMInitialized = false;
 
-    SharedPreferences prefs;
-    SharedPreferences.Editor editor;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,6 +104,7 @@ public class MainActivity extends Activity {
 
         prefs = getSharedPreferences("preference",MODE_PRIVATE);
         editor = prefs.edit();
+
         if(prefs.getBoolean("first_activated",true)){
             showGuide();
         }
@@ -96,14 +121,16 @@ public class MainActivity extends Activity {
     public void setStart(){
         setContentView(R.layout.activity_main);
 
+        //setting billing service
         bindService(new Intent("com.android.vending.billing.InAppBillingService.BIND"),
                 serviceConnection,Context.BIND_AUTO_CREATE);
+        ArrayList<String> skuList = new ArrayList<String>();
+        skuList.add("delete_ads");
+        Bundle querySkus = new Bundle();
+        querySkus.putStringArrayList("ITEM_ID_LIST",skuList);
 
         //game feat ads
         gfAppCntroller = new GameFeatAppController();
-        gfAppCntroller.setRefreshInterval(30);
-        ((GameFeatIconView)findViewById(R.id.gf_icon1)).addLoader(gfAppCntroller);
-        ((GameFeatIconView)findViewById(R.id.gf_icon2)).addLoader(gfAppCntroller);
         Button adButton = (Button)findViewById(R.id.wall_button);
         adButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,14 +139,7 @@ public class MainActivity extends Activity {
             }
         });
 
-        Button button = (Button)findViewById(R.id.start_button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setGame();
-            }
-        });
-
+        //play game services
         final GameHelper.GameHelperListener gameHelperListener = new GameHelper.GameHelperListener() {
             @Override
             public void onSignInFailed() {
@@ -143,6 +163,14 @@ public class MainActivity extends Activity {
             gameHelper.beginUserInitiatedSignIn();
         }
 
+        //setting view
+        Button button = (Button)findViewById(R.id.start_button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setGame();
+            }
+        });
         Button rankingButton = (Button)findViewById(R.id.ranking_button);
         rankingButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -156,6 +184,34 @@ public class MainActivity extends Activity {
                 }
             }
         });
+        Button adDeleteButton = (Button)findViewById(R.id.ad_delete_button);
+        adDeleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Bundle buyIntentBundle = billingServices.getBuyIntent(3, getPackageName(),
+                            "delete_ads", "inapp", "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
+                    if(buyIntentBundle.getInt("RESPONCE_CODE") == 0){
+                        PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+                        try {
+                            startIntentSenderForResult(pendingIntent.getIntentSender(),
+                                    1001, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
+                                    Integer.valueOf(0));
+                        }catch(IntentSender.SendIntentException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }catch(RemoteException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        if(prefs.getBoolean("delete_ads",false)){
+            RelativeLayout relativeLayout = (RelativeLayout)findViewById(R.id.main_layout);
+            relativeLayout.removeView(adButton);
+            relativeLayout.removeView(adDeleteButton);
+        }
     }
 
     public void setGame(){
@@ -209,7 +265,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        gfAppCntroller.activateGF(this,false,true,true);
+        gfAppCntroller.activateGF(this,false,false,false);
         if(isSignIn) {
             gameHelper.onStart(this);
         }
@@ -230,11 +286,31 @@ public class MainActivity extends Activity {
     public void onDestroy(){
         super.onDestroy();
         bgm.release();
+        if(billingServices != null){
+            unbindService(serviceConnection);
+        }
     }
 
     @Override
     protected void onActivityResult(int request, int response, Intent data) {
         super.onActivityResult(request, response, data);
+        if(request == 1001){
+            int responceCode = data.getIntExtra("RESPONCE_CODE",0);
+            String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+            String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
+            if(responceCode== RESULT_OK){
+                try {
+                    JSONObject jo = new JSONObject(purchaseData);
+                    String sku = jo.getString("productId");
+                    if("delete_ads".equals(sku)){
+                        editor.putBoolean("delete_ads",true);
+                        editor.commit();
+                    }
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        }
         if(isSignIn) {
             gameHelper.onActivityResult(request, response, data);
         }

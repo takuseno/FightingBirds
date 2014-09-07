@@ -15,6 +15,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.games.Games;
@@ -105,8 +106,10 @@ public class ResultActivity extends Activity {
     public void init(){
         gfAppController = new GameFeatAppController();
 
-        gfAppController.setPopupProbability(3);
+        if(!prefs.getBoolean("delete_ads",false)) {
+            gfAppController.setPopupProbability(3);
 //        gfAppController.showPopupAdDialog(ResultActivity.this);
+        }
 
         int previousBalloons = prefs.getInt("balloons",0);
         previousBalloons += getIntent().getIntExtra("balloons",0);
@@ -183,6 +186,11 @@ public class ResultActivity extends Activity {
         resultGLSurfaceView = (ResultGLSurfaceView)findViewById(R.id.result_glview);
         if(!isNewRecord)
             frameLayout.removeView(resultGLSurfaceView);
+
+        if(prefs.getBoolean("delete_ads",false)){
+            RelativeLayout relativeLayout = (RelativeLayout)findViewById(R.id.result_layoutview);
+            relativeLayout.removeView(adButton);
+        }
 
         initialized = true;
     }

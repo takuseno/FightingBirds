@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/main_layout"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -45,24 +46,6 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"/>
 
-    <jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView
-        android:layout_width="50sp"
-        android:layout_height="50sp"
-        android:id="@+id/gf_icon1"
-        android:layout_toEndOf="@+id/gf_icon2"
-        android:layout_below="@+id/gf_icon2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"></jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView>
-
-    <jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView
-        android:layout_width="50sp"
-        android:layout_height="50sp"
-        android:id="@+id/gf_icon2"
-        android:layout_toEndOf="@+id/wall_button"
-        android:layout_below="@+id/wall_button"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"></jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -73,4 +56,15 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="10sp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="  広告削除  "
+        android:id="@+id/ad_delete_button"
+        android:background="@drawable/normal_button"
+        android:layout_below="@+id/wall_button"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>

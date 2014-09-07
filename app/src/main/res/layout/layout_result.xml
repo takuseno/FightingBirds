@@ -12,9 +12,11 @@
         android:id="@+id/result_glview"/>
 
 <RelativeLayout
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16sp">
+    android:padding="16sp"
+    android:id="@+id/result_layoutview">
 
     <Button
         android:layout_width="wrap_content"
