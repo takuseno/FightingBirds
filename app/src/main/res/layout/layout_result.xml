@@ -13,17 +13,18 @@
 
 <RelativeLayout
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16sp">
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="  Facebook  "
         android:id="@+id/facebook"
-        android:layout_below="@+id/score_text"
-        android:layout_toRightOf="@+id/newRecordText"
         android:layout_toEndOf="@+id/newRecordText"
-        android:background="@drawable/normal_button" />
+        android:background="@drawable/normal_button"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/newRecordText" />
 
     <Button
         android:layout_width="wrap_content"
@@ -32,7 +33,7 @@
         android:id="@+id/twitter"
         android:layout_toStartOf="@+id/newRecordText"
         android:background="@drawable/normal_button"
-        android:layout_alignTop="@+id/facebook"
+        android:layout_alignParentBottom="true"
         android:layout_toLeftOf="@+id/newRecordText" />
 
     <TextView
@@ -52,7 +53,7 @@
         android:text="  Title  "
         android:id="@+id/title_button"
         android:background="@drawable/normal_button"
-        android:layout_below="@+id/score_text"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
     <TextView
@@ -66,6 +67,16 @@
         android:layout_above="@+id/score_text"
         android:layout_centerHorizontal="true"
         android:visibility="invisible"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/wall_button2"
+        android:background="@drawable/normal_button"
+        android:text="  Free Games  "
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>
 
 </FrameLayout>

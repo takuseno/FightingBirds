@@ -17,10 +17,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets{
+        main{
+            aidl.srcDirs = ['src/main/aidl']
+        }
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':BaseGameUtils')
     compile 'com.google.android.gms:play-services:5.0.77'
+    compile files('libs/GameFeatSDK.jar')
 }

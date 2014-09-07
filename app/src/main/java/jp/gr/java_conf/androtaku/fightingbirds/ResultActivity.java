@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.GameHelper;
 
+import jp.basicinc.gamefeat.android.sdk.controller.GameFeatAppController;
+
 /**
  * Created by takuma on 2014/08/21.
  */
@@ -28,7 +31,10 @@ public class ResultActivity extends Activity {
 
     GameHelper gameHelper;
 
+
     ResultGLSurfaceView resultGLSurfaceView;
+
+    GameFeatAppController gfAppController;
 
     private boolean isNewRecord = false;
     private boolean initialized = false;
@@ -48,34 +54,84 @@ public class ResultActivity extends Activity {
         final GameHelper.GameHelperListener gameHelperListener = new GameHelper.GameHelperListener() {
             @Override
             public void onSignInFailed() {
-
+                Log.i("signin","failed");
             }
 
             @Override
             public void onSignInSucceeded() {
-
+                Log.i("signin","success");
+                //submit score
+                if(isNewRecord){
+                    Games.Leaderboards.submitScore(gameHelper.getApiClient(),
+                            getString(R.string.lb_id), getIntent().getIntExtra("score",0));
+                }
+                //unlock achievements
+                if(prefs.getInt("best_score",0) > 10000){
+                    Games.Achievements.unlock(gameHelper.getApiClient(),
+                            getString(R.string.achievement_amateur));
+                }
+                if(prefs.getInt("best_score", 0) > 20000){
+                    Games.Achievements.unlock(gameHelper.getApiClient(),
+                            getString(R.string.achievement_veteran));
+                }
+                if(prefs.getInt("best_score", 0)  > 25000){
+                    Games.Achievements.unlock(gameHelper.getApiClient(),
+                            getString(R.string.achievement_professional));
+                }
+                if(prefs.getInt("balloons",0) > 99 && gameHelper.isSignedIn()){
+                    Games.Achievements.unlock(gameHelper.getApiClient(),
+                            getString(R.string.achievement_balloon_enthusiast));
+                }
+                if(prefs.getInt("birds",0) > 99 && gameHelper.isSignedIn()){
+                    Games.Achievements.unlock(gameHelper.getApiClient(),
+                            getString(R.string.achievement_clow_killer));
+                }
             }
         };
+
+        prefs = getSharedPreferences("preference",MODE_PRIVATE);
+        editor = prefs.edit();
+
         gameHelper = new GameHelper(ResultActivity.this,GameHelper.CLIENT_GAMES);
-        gameHelper.setMaxAutoSignInAttempts(0);
         gameHelper.setup(gameHelperListener);
+        if(prefs.getBoolean("signIn",false)) {
+            gameHelper.beginUserInitiatedSignIn();
+        }
 
         setContentView(R.layout.layout_result);
         init();
     }
 
     public void init(){
-        prefs = getSharedPreferences("preference",MODE_PRIVATE);
-        editor = prefs.edit();
+        gfAppController = new GameFeatAppController();
+
+        gfAppController.setPopupProbability(3);
+//        gfAppController.showPopupAdDialog(ResultActivity.this);
+
+        int previousBalloons = prefs.getInt("balloons",0);
+        previousBalloons += getIntent().getIntExtra("balloons",0);
+        editor.putInt("balloons",previousBalloons);
+        editor.commit();
+
+        int previousBirds = prefs.getInt("birds",0);
+        previousBirds += getIntent().getIntExtra("birds",0);
+        editor.putInt("birds",previousBirds);
+        editor.commit();
+
+        Button adButton = (Button)findViewById(R.id.wall_button2);
+        adButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gfAppController.show(ResultActivity.this);
+            }
+        });
+
         if(getIntent().getIntExtra("score",0) > prefs.getInt("best_score",0)){
             editor.putInt("best_score",getIntent().getIntExtra("score",0));
             editor.commit();
             TextView bestRecord = (TextView)findViewById(R.id.newRecordText);
             bestRecord.setVisibility(View.VISIBLE);
             isNewRecord = true;
-            if(gameHelper.isSignedIn()){
-                Games.Leaderboards.submitScore(gameHelper.getApiClient(), getString(R.string.lb_id), getIntent().getIntExtra("score",0));
-            }
         }
 
         FrameLayout frameLayout = (FrameLayout)findViewById(R.id.framelayout);
@@ -129,6 +185,12 @@ public class ResultActivity extends Activity {
             frameLayout.removeView(resultGLSurfaceView);
 
         initialized = true;
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        gfAppController.activateGF(this,false,false,true);
     }
 
     @Override

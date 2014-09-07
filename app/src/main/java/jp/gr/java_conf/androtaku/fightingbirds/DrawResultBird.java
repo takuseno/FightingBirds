@@ -21,7 +21,6 @@ public class DrawResultBird {
     private int dispWidth,dispHeight;
 
     public int flyingFrame = 0;
-    public int stumblingFrame = 0;
     private float birdY;
 
     public DrawResultBird(Context context,GL10 gl,int dispWidth,int dispHeight){
@@ -29,28 +28,17 @@ public class DrawResultBird {
         this.dispHeight = dispHeight;
         drawTexture = new DrawTexture(context,2,dispWidth,dispHeight);
         drawTexture.setTexture(textureIds,gl);
-        birdY = dispHeight/2 - (dispWidth/12);
+        birdY = dispHeight/2;
     }
 
     public void draw(GL10 gl){
         gl.glActiveTexture(GL10.GL_TEXTURE0);
         if (flyingFrame < 30) {
             drawTexture.drawTexture(gl,0,dispWidth/5,(int)birdY,dispWidth/6,dispWidth/6);
-            drawTexture.drawTexture(gl,0,4*dispWidth/5 - (dispWidth/6),(int)birdY,dispWidth/6,dispWidth/6);
+            drawTexture.drawTexture(gl,0,4*dispWidth/5,(int)birdY,dispWidth/6,dispWidth/6);
         } else {
             drawTexture.drawTexture(gl,1,dispWidth/5,(int)birdY,dispWidth/6,dispWidth/6);
-            drawTexture.drawTexture(gl,1,4*dispWidth/5 - (dispWidth/6),(int)birdY,dispWidth/6,dispWidth/6);
-        }
-
-        if(stumblingFrame < 30) {
-            birdY -= dispHeight / 60;
-        }
-        else{
-            birdY += dispHeight/60;
-        }
-        ++stumblingFrame;
-        if(stumblingFrame == 60){
-            stumblingFrame = 0;
+            drawTexture.drawTexture(gl,1,4*dispWidth/5,(int)birdY,dispWidth/6,dispWidth/6);
         }
 
         ++flyingFrame;

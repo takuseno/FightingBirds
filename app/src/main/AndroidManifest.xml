@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="jp.gr.java_conf.androtaku.fightingbirds" >
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/app_icon"
@@ -24,6 +28,30 @@
         </activity>
         <activity android:name=".ResultActivity"
             android:screenOrientation="landscape"/>
+
+        <!-- GameFeat START -->
+        <meta-data android:name="gamefeat_site_id" android:value="7925" />
+        <activity
+            android:name="jp.basicinc.gamefeat.android.sdk.view.GameFeatAppActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="GameFeat" >
+        </activity>
+        <activity
+            android:name="jp.basicinc.gamefeat.android.sdk.view.GameFeatAppChildActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="GameFeat"
+            android:screenOrientation="sensor" >
+        </activity>
+        <receiver
+            android:name="jp.basicinc.gamefeat.android.sdk.receiver.GameFeatBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED"/>
+                <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
+        <!-- GameFeat END -->
 
     </application>
 

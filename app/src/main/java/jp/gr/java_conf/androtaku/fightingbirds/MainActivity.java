@@ -3,13 +3,16 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,6 +23,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.vending.billing.IInAppBillingService;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.BaseGameActivity;
@@ -27,13 +31,30 @@ import com.google.example.games.basegameutils.GameHelper;
 
 import java.io.IOException;
 
+import jp.basicinc.gamefeat.android.sdk.controller.GameFeatAppController;
+import jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView;
+
 
 public class MainActivity extends Activity {
 
     GameHelper gameHelper;
+    IInAppBillingService billingServices;
+    ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            billingServices = IInAppBillingService.Stub.asInterface(service);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            billingServices = null;
+        }
+    };
 
     PlayGLSurfaceView playGLSurfaceView;
     MediaPlayer bgm;
+
+    GameFeatAppController gfAppCntroller;
 
     private int START = 0;
     private int PLAY = 1;
@@ -70,11 +91,26 @@ public class MainActivity extends Activity {
         isBGMInitialized = true;
 
         setStart();
-
     }
 
     public void setStart(){
         setContentView(R.layout.activity_main);
+
+        bindService(new Intent("com.android.vending.billing.InAppBillingService.BIND"),
+                serviceConnection,Context.BIND_AUTO_CREATE);
+
+        //game feat ads
+        gfAppCntroller = new GameFeatAppController();
+        gfAppCntroller.setRefreshInterval(30);
+        ((GameFeatIconView)findViewById(R.id.gf_icon1)).addLoader(gfAppCntroller);
+        ((GameFeatIconView)findViewById(R.id.gf_icon2)).addLoader(gfAppCntroller);
+        Button adButton = (Button)findViewById(R.id.wall_button);
+        adButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gfAppCntroller.show(MainActivity.this);
+            }
+        });
 
         Button button = (Button)findViewById(R.id.start_button);
         button.setOnClickListener(new View.OnClickListener() {
@@ -87,17 +123,21 @@ public class MainActivity extends Activity {
         final GameHelper.GameHelperListener gameHelperListener = new GameHelper.GameHelperListener() {
             @Override
             public void onSignInFailed() {
-
+                Log.i("signin","failed");
             }
 
             @Override
             public void onSignInSucceeded() {
+                Log.i("signin","success");
+                Games.Achievements.unlock(gameHelper.getApiClient(),
+                        getString(R.string.achievement_follow_me));
+                Games.Leaderboards.submitScore(gameHelper.getApiClient(),
+                        getString(R.string.lb_id), prefs.getInt("best_score",0));
                 editor.putBoolean("signIn",true);
                 editor.commit();
             }
         };
         gameHelper = new GameHelper(MainActivity.this,GameHelper.CLIENT_GAMES);
-        gameHelper.setMaxAutoSignInAttempts(0);
         gameHelper.setup(gameHelperListener);
         if(prefs.getBoolean("signIn",false)){
             gameHelper.beginUserInitiatedSignIn();
@@ -144,7 +184,10 @@ public class MainActivity extends Activity {
         if(isBGMInitialized) {
             bgm.start();
         }
-        if(Mode == PLAY) {
+        if(Mode == START){
+            gfAppCntroller.startIconAd();
+        }
+        else if(Mode == PLAY) {
             playGLSurfaceView.onResume();
         }
     }
@@ -166,6 +209,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        gfAppCntroller.activateGF(this,false,true,true);
         if(isSignIn) {
             gameHelper.onStart(this);
         }
@@ -174,6 +218,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        if(Mode == START){
+            gfAppCntroller.stopIconAd();
+        }
         if(isSignIn) {
             gameHelper.onStop();
         }

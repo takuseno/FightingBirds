@@ -19,6 +19,8 @@ public class PlaySequence {
     //declare global variables
     private int score;
     private Context context;
+    private int balloonCounter;
+    private int birdCounter;
 
     //function of initialization
     public void init(Context context,GL10 gl,int dispWidth,int dispHeight){
@@ -30,6 +32,8 @@ public class PlaySequence {
         drawScore = new DrawScore(dispWidth, dispHeight);
         drawScore.setTexture(gl, 0);
         score = 0;
+        balloonCounter = 0;
+        birdCounter = 0;
     }
 
     //function of setting texture when resume
@@ -65,6 +69,8 @@ public class PlaySequence {
             //transition to result screen
             Intent intent = new Intent(context,ResultActivity.class);
             intent.putExtra("score",score);
+            intent.putExtra("balloons",balloonCounter);
+            intent.putExtra("birds",birdCounter);
             ((MainActivity)context).finish();
             context.startActivity(intent);
         }
@@ -93,15 +99,18 @@ public class PlaySequence {
                         if(enemyTags[enemyId[j]] == enemy.CLOW) {
                             bird.hit(i);
                             //add score
-                            score += 10 * bird.getNumAlive();
+                            score += 10 * bird.getNumAlive() * 2;
                             //remake score texture
                             drawScore.setTexture(gl,score);
+                            ++birdCounter;
                         }
                         else if(enemyTags[enemyId[j]] == enemy.BALLOON_RED) {
                             bird.hitBalloonRed();
+                            ++balloonCounter;
                         }
                         else if(enemyTags[enemyId[j]] == enemy.BALLOON_GREEN){
                             bird.hitBalloonGreen();
+                            ++balloonCounter;
                         }
                         //processing of a hit enemy
                         enemy.hit(enemyId[j]);

@@ -2,4 +2,10 @@
 <resources>
     <string name="app_id">288039464569</string>
     <string name="lb_id">CgkI-dz1g7EIEAIQAQ</string>
+    <string name="achievement_follow_me">CgkI-dz1g7EIEAIQAg</string>
+    <string name="achievement_amateur">CgkI-dz1g7EIEAIQAw</string>
+    <string name="achievement_veteran">CgkI-dz1g7EIEAIQBA</string>
+    <string name="achievement_professional">CgkI-dz1g7EIEAIQBQ</string>
+    <string name="achievement_balloon_enthusiast">CgkI-dz1g7EIEAIQBg</string>
+    <string name="achievement_clow_killer">CgkI-dz1g7EIEAIQBw</string>
 </resources>
