@@ -111,7 +111,7 @@ public class MainActivity extends Activity{
             showGuide();
         }
 
-        bgm = MediaPlayer.create(this,R.raw.result_bgm);
+        bgm = MediaPlayer.create(this,R.raw.main_bgm);
         bgm.setLooping(true);
         bgm.setVolume(0.2f,0.2f);
         bgm.start();
@@ -178,7 +178,9 @@ public class MainActivity extends Activity{
                             getString(R.string.lb_id)), 5001);
                 }
                 else{
+                    gameHelper.setConnectOnStart(true);
                     gameHelper.beginUserInitiatedSignIn();
+
                 }
             }
         });
@@ -320,8 +322,6 @@ public class MainActivity extends Activity{
                 }
             }
         }
-        if(isSignIn) {
-            gameHelper.onActivityResult(request, response, data);
-        }
+        gameHelper.onActivityResult(request, response, data);
     }
 }

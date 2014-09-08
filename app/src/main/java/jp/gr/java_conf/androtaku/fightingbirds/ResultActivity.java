@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ public class ResultActivity extends Activity {
 
     GameHelper gameHelper;
 
+    MediaPlayer bgm;
 
     ResultGLSurfaceView resultGLSurfaceView;
 
@@ -192,6 +194,10 @@ public class ResultActivity extends Activity {
             relativeLayout.removeView(adButton);
         }
 
+        bgm = MediaPlayer.create(this,R.raw.result_bgm);
+        bgm.setVolume(0.2f,0.2f);
+        bgm.start();
+
         initialized = true;
     }
 
@@ -213,6 +219,8 @@ public class ResultActivity extends Activity {
     public void onPause(){
         super.onPause();
         resultGLSurfaceView.onPause();
+        bgm.stop();
+        bgm.release();
     }
 
     @Override
