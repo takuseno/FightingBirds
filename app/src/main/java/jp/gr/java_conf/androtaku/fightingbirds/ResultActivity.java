@@ -22,7 +22,10 @@ import android.widget.TextView;
 import com.google.android.gms.games.Games;
 import com.google.example.games.basegameutils.GameHelper;
 
+import java.util.Random;
+
 import jp.basicinc.gamefeat.android.sdk.controller.GameFeatAppController;
+import jp.basicinc.gamefeat.android.sdk.view.listener.GameFeatPopupListener;
 
 /**
  * Created by takuma on 2014/08/21.
@@ -108,11 +111,6 @@ public class ResultActivity extends Activity {
     public void init(){
         gfAppController = new GameFeatAppController();
 
-        if(!prefs.getBoolean("delete_ads",false)) {
-            gfAppController.setPopupProbability(3);
-//        gfAppController.showPopupAdDialog(ResultActivity.this);
-        }
-
         int previousBalloons = prefs.getInt("balloons",0);
         previousBalloons += getIntent().getIntExtra("balloons",0);
         editor.putInt("balloons",previousBalloons);
@@ -147,9 +145,49 @@ public class ResultActivity extends Activity {
         titleButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ResultActivity.this,MainActivity.class);
-                startActivity(intent);
-                finish();
+                if(!prefs.getBoolean("delete_ads",false)) {
+                    Random random = new Random();
+                    if(random.nextInt(3) == 0) {
+                        gfAppController.showPopupAdDialog(ResultActivity.this, new GameFeatPopupListener() {
+                            @Override
+                            public void onClickFinished() {
+
+                            }
+
+                            @Override
+                            public void onClickClosed() {
+
+                            }
+
+                            @Override
+                            public void onViewSuccess() {
+                            }
+
+                            @Override
+                            public void onViewError() {
+
+                            }
+
+                            @Override
+                            public void onDismiss() {
+                                Intent intent = new Intent(ResultActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                        });
+                    }
+                    else{
+                        Intent intent = new Intent(ResultActivity.this,MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+                else {
+                    Intent intent = new Intent(ResultActivity.this,MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                }
+
             }
         });
 
@@ -204,7 +242,7 @@ public class ResultActivity extends Activity {
     @Override
     public void onStart(){
         super.onStart();
-        gfAppController.activateGF(this,false,false,true);
+        gfAppController.activateGF(this,false,true,true);
     }
 
     @Override
@@ -220,6 +258,11 @@ public class ResultActivity extends Activity {
         super.onPause();
         resultGLSurfaceView.onPause();
         bgm.stop();
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
         bgm.release();
     }
 

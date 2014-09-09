@@ -69,4 +69,27 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView
+        android:layout_width="60sp"
+        android:layout_height="60sp"
+        android:id="@+id/iconView1"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"/>
+
+    <jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView
+        android:layout_width="60sp"
+        android:layout_height="60sp"
+        android:id="@+id/iconView2"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/iconView1"
+        android:layout_toStartOf="@+id/iconView1" />
+
+    <jp.basicinc.gamefeat.android.sdk.view.GameFeatIconView
+        android:layout_width="60sp"
+        android:layout_height="60sp"
+        android:id="@+id/iconView3"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/iconView1"
+        android:layout_toEndOf="@+id/iconView1" />
+
 </RelativeLayout>

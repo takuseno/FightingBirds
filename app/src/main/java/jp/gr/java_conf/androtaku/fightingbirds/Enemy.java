@@ -47,7 +47,8 @@ public class Enemy {
     private float ENEMY_SPEED;
     //rate of accelarating speed
     private float speedRate;
-
+    //possibility of stumbling tag
+    private int possibilityStumbling;
     //limit of frame waiting for born
     private int BORN_FRAME_LIMIT;
     //index of born enemy
@@ -57,11 +58,13 @@ public class Enemy {
     private boolean[] isAlive;
     private boolean[] isFalling;
     public boolean isOutside;
+    private boolean[] isStumbling;
 
     //frames
     private int flyingFrame;
     private int[] fallingFrame;
     private int bornFrame;
+    private int[] stumblingFrame;
 
     public Enemy(Context context,GL10 gl,int dispWidth,int dispHeight){
         this.dispWidth = dispWidth;
@@ -86,17 +89,21 @@ public class Enemy {
         isFalling = new boolean[ENEMY_NUM];
         fallingFrame = new int[ENEMY_NUM];
         enemyTags = new int[ENEMY_NUM];
+        isStumbling = new boolean[ENEMY_NUM];
+        stumblingFrame = new int[ENEMY_NUM];
         for(int i = 0;i < ENEMY_NUM;++i){
             isAlive[i] = false;
             isFalling[i] = false;
+            isStumbling[i] = false;
         }
         bornIndex = 0;
         bornFrame = 0;
-        ENEMY_SPEED = dispWidth/200;
-        BORN_FRAME_LIMIT = 40;
+        ENEMY_SPEED = dispWidth/160;
+        BORN_FRAME_LIMIT = 25;
         SIZE_CLOW = dispWidth/10;
         isOutside = false;
         speedRate = 1.0f;
+        possibilityStumbling = 0;
     }
 
     //function of drawing
@@ -120,6 +127,13 @@ public class Enemy {
                 if(isAlive[i]) {
                     //move enemy
                     enemyX[i] -= ENEMY_SPEED * speedRate;
+                    if(isStumbling[i]){
+                        enemyY[i] += (float)Math.sin((float)stumblingFrame[i]/360*2*3.14)*(dispHeight/170);
+                        ++stumblingFrame[i];
+                        if(stumblingFrame[i] == 360){
+                            stumblingFrame[i] = 0;
+                        }
+                    }
                     //check enemy outside
                     if (enemyX[i] < -dispWidth / 5) {
                         isAlive[i] = false;
@@ -165,14 +179,23 @@ public class Enemy {
                 enemyTags[bornIndex] = BALLOON_GREEN;
             else
                 enemyTags[bornIndex] = CLOW;
+            rand = random.nextInt(80);
+            for(int i = 0;i < possibilityStumbling;++i) {
+                if (rand == i) {
+                    isStumbling[bornIndex] = true;
+                    stumblingFrame[bornIndex] = random.nextInt(360);
+                    break;
+                }
+            }
             ++bornIndex;
             //loop index
             if(bornIndex == ENEMY_NUM){
                 bornIndex = 0;
             }
             if(bornIndex%20 == 0){
-                speedRate += 0.1;
-                BORN_FRAME_LIMIT = (int)(30 / speedRate);
+                speedRate += 0.05;
+                BORN_FRAME_LIMIT = (int)(25 / speedRate);
+                ++possibilityStumbling;
                 Log.i("up","" + bornIndex);
             }
         }

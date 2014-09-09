@@ -136,6 +136,13 @@ public class MainActivity extends Activity{
                 gfAppCntroller.show(MainActivity.this);
             }
         });
+        gfAppCntroller.setRefreshInterval(30);
+        GameFeatIconView iconView1 = (GameFeatIconView)findViewById(R.id.iconView1);
+        iconView1.addLoader(gfAppCntroller);
+        GameFeatIconView iconView2 = (GameFeatIconView)findViewById(R.id.iconView2);
+        iconView2.addLoader(gfAppCntroller);
+        GameFeatIconView iconView3 = (GameFeatIconView)findViewById(R.id.iconView3);
+        iconView3.addLoader(gfAppCntroller);
 
         //play game services
         final GameHelper.GameHelperListener gameHelperListener = new GameHelper.GameHelperListener() {
@@ -211,6 +218,9 @@ public class MainActivity extends Activity{
             RelativeLayout relativeLayout = (RelativeLayout)findViewById(R.id.main_layout);
             relativeLayout.removeView(adButton);
             relativeLayout.removeView(adDeleteButton);
+            relativeLayout.removeView(iconView1);
+            relativeLayout.removeView(iconView2);
+            relativeLayout.removeView(iconView3);
         }
     }
 
@@ -258,6 +268,7 @@ public class MainActivity extends Activity{
         else if(Mode == PLAY) {
             playGLSurfaceView.onResume();
         }
+        gfAppCntroller.startIconAd();
     }
 
     @Override
@@ -277,7 +288,7 @@ public class MainActivity extends Activity{
     @Override
     protected void onStart() {
         super.onStart();
-        gfAppCntroller.activateGF(this,false,false,false);
+        gfAppCntroller.activateGF(this,false,true,false);
         if(isSignIn) {
             gameHelper.onStart(this);
         }
@@ -292,6 +303,7 @@ public class MainActivity extends Activity{
         if(isSignIn) {
             gameHelper.onStop();
         }
+        gfAppCntroller.stopIconAd();
     }
 
     @Override
