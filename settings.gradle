@@ -1,2 +1,2 @@
-include ':app', ':BaseGameUtils', ':TAMAGameFrame'
+include ':app', ':BaseGameUtils'
 project(':BaseGameUtils').projectDir = new File('app/libs/BaseGameUtils')
