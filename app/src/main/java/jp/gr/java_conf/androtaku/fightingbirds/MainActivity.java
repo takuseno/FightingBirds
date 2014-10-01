@@ -11,7 +11,9 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -82,6 +84,8 @@ public class MainActivity extends Activity{
 
     PlayGLSurfaceView playGLSurfaceView;
     MediaPlayer bgm;
+    SoundPool soundPool;
+    int soundId;
 
     GameFeatAppController gfAppCntroller;
 
@@ -113,9 +117,12 @@ public class MainActivity extends Activity{
 
         bgm = MediaPlayer.create(this,R.raw.main_bgm);
         bgm.setLooping(true);
-        bgm.setVolume(0.2f,0.2f);
+        bgm.setVolume(0.1f,0.1f);
         bgm.start();
         isBGMInitialized = true;
+
+        soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC,0);
+        soundId = soundPool.load(this,R.raw.start_button,1);
 
         setStart();
     }
@@ -173,6 +180,7 @@ public class MainActivity extends Activity{
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                soundPool.play(soundId,1.0f,1.0f,0,0,1);
                 setGame();
             }
         });
@@ -310,6 +318,7 @@ public class MainActivity extends Activity{
     public void onDestroy(){
         super.onDestroy();
         bgm.release();
+        soundPool.release();
         if(billingServices != null){
             unbindService(serviceConnection);
         }

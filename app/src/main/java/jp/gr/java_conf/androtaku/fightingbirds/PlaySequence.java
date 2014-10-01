@@ -2,6 +2,8 @@ package jp.gr.java_conf.androtaku.fightingbirds;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.util.Log;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -21,6 +23,9 @@ public class PlaySequence {
     private Context context;
     private int balloonCounter;
     private int birdCounter;
+    private SoundPool soundPool;
+    int soundHit;
+    int soundItem;
 
     //function of initialization
     public void init(Context context,GL10 gl,int dispWidth,int dispHeight){
@@ -31,6 +36,9 @@ public class PlaySequence {
         enemy.init(this);
         drawScore = new DrawScore(dispWidth, dispHeight);
         drawScore.setTexture(gl, 0);
+        soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC,1);
+        soundHit = soundPool.load(context,R.raw.hit,1);
+        soundItem = soundPool.load(context,R.raw.up1,1);
         score = 0;
         balloonCounter = 0;
         birdCounter = 0;
@@ -97,6 +105,7 @@ public class PlaySequence {
                                 < (bird.SIZE_BIRD + enemyRadius)/2.5) {
                         //processing of a hit bird
                         if(enemyTags[enemyId[j]] == enemy.CLOW) {
+                            soundPool.play(soundHit,20,20,0,0,1.0f);
                             bird.hit(i);
                             //add score
                             score += 10 * bird.getNumAlive() * 2;
@@ -105,10 +114,12 @@ public class PlaySequence {
                             ++birdCounter;
                         }
                         else if(enemyTags[enemyId[j]] == enemy.BALLOON_RED) {
+                            soundPool.play(soundItem,1.0f,1.0f,0,0,1.0f);
                             bird.hitBalloonRed();
                             ++balloonCounter;
                         }
                         else if(enemyTags[enemyId[j]] == enemy.BALLOON_GREEN){
+                            soundPool.play(soundItem,1.0f,1.0f,0,0,1.0f);
                             bird.hitBalloonGreen();
                             ++balloonCounter;
                         }

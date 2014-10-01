@@ -63,7 +63,7 @@ public class BirdsControl {
             isCraming[i] = false;
             isFalling[i] = false;
         }
-        closerSpeed = dispHeight / 100;
+        closerSpeed = dispHeight / 80;
         fallingIndex = 0;
     }
 
@@ -75,8 +75,8 @@ public class BirdsControl {
         for(int i = 1;i < numBirds;++i){
             frontBirdY = birdsY[i - 1];
             //check if front bird is far
-            if(birdsY[i] > frontBirdY + (closerSpeed*8)
-                    || birdsY[i] < frontBirdY - (closerSpeed*8)){
+            if(birdsY[i] > frontBirdY + (closerSpeed*7)
+                    || birdsY[i] < frontBirdY - (closerSpeed*7)){
                 isMoving[i] = true;
             }
             //check bird moving

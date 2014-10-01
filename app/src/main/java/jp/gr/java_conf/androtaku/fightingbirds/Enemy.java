@@ -193,7 +193,7 @@ public class Enemy {
                 bornIndex = 0;
             }
             if(bornIndex%20 == 0){
-                speedRate += 0.05;
+                speedRate += 0.1;
                 BORN_FRAME_LIMIT = (int)(25 / speedRate);
                 ++possibilityStumbling;
                 Log.i("up","" + bornIndex);
