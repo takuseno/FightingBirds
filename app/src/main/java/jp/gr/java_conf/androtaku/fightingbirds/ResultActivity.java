@@ -195,7 +195,7 @@ public class ResultActivity extends Activity {
         twitterButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "twitter://post?message="+"Fighting Birdsで" + getIntent().getIntExtra("score",0)
+                String url = "twitter://post?message="+"Waving Birdsで" + getIntent().getIntExtra("score",0)
                         +"点！ https://play.google.com/store/apps/details?id=jp.gr.java_conf.androtaku.fightingbirds";
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
